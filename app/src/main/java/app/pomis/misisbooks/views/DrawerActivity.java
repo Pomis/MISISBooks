@@ -41,6 +41,8 @@ import com.mikepenz.materialdrawer.model.interfaces.Badgeable;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import app.pomis.misisbooks.R;
@@ -93,7 +95,11 @@ public class DrawerActivity extends ActionBarActivity {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                     if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                        doSearch();
+                        try {
+                            doSearch();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                         return true;
                     }
                     return false;
@@ -104,7 +110,11 @@ public class DrawerActivity extends ActionBarActivity {
 
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (!hasFocus) {
-                        doSearch();
+                        try {
+                            doSearch();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
@@ -132,8 +142,8 @@ public class DrawerActivity extends ActionBarActivity {
         super.onBackPressed();
     }
 
-    public void doSearch() {
-        BackgroundLoader.startLoadingSearchResults(edtSeach.getText().toString(),10,0,catId);
+    public void doSearch() throws UnsupportedEncodingException {
+        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(edtSeach.getText().toString(), "UTF-8"),10,0,catId);
     }
 
 
@@ -311,6 +321,7 @@ public class DrawerActivity extends ActionBarActivity {
                             }
                         }
                         Fragment fragment = null;
+                        if (drawerItem!=null && drawerItem.getIdentifier()!=0)
                         switch (drawerItem.getIdentifier()) {
                             case 1:
                                 fragment = new SearchFragment();
