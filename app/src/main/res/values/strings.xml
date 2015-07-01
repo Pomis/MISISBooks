@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">MISIS Books</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
+
+    <string name="drawer_item_home">Home</string>
+    <string name="drawer_item_free_play">Free Play</string>
+    <string name="drawer_item_custom">Custom</string>
+    <string name="drawer_item_settings">Настройки</string>
+    <string name="drawer_item_help">Опции</string>
+    <string name="drawer_item_open_source">Open Source</string>
+    <string name="drawer_item_contact">О программе</string>
+    <string name="drawer_item_1">Поиск</string>
+    <string name="drawer_item_2">Загрузки</string>
+    <string name="drawer_item_3">Избранное</string>
+    <string name="drawer_item_4">Помощь</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
