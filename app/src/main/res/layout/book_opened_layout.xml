@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="60dp"
-    android:background="@drawable/card_listed"
+    android:minHeight="100dp"
+    android:background="@drawable/card"
     >
 
     <ImageView
@@ -46,13 +46,42 @@
         android:minWidth="200dp"
         android:layout_height="wrap_content"
         android:id="@+id/subText"
-        android:textColor="#000000"
+        android:textColor="#000"
         android:text="Нет автора"
         android:layout_below="@+id/title"
         android:layout_alignLeft="@+id/title"
         android:layout_alignStart="@+id/title"
-        android:layout_marginRight="16dp"
-        android:paddingBottom="8dp"/>
+        android:layout_marginRight="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:minWidth="200dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/sizeText"
+        android:textColor="#000"
+        android:text="Размер"
+        android:layout_below="@+id/subText"
+        android:layout_alignLeft="@+id/subText"
+        android:layout_alignStart="@+id/subText"
+        android:layout_marginRight="16dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="В избранное"
+        android:id="@+id/button"
+        android:layout_below="@+id/sizeText"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Загрузить"
+        android:id="@+id/button2"
+        android:layout_alignTop="@+id/button"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>

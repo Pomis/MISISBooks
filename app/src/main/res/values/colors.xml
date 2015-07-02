@@ -2,5 +2,6 @@
 <resources>
     <color name="primaryColor">#fc484c</color>
     <color name="primaryColorDark">#b33336</color>
-    <color name="lightGray">#efefef</color>
+    <color name="searchBackground">#fff4f4f4</color>
+    <color name="cardBackground">#fff4f4f4</color>
 </resources>

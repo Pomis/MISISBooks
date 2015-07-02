@@ -54,7 +54,7 @@ import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
 
-public class DrawerActivity extends ActionBarActivity {
+public class DrawerActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
     static DrawerActivity singleton;
     Drawer mDrawer;
     ContentAdapter mContentAdapter;
@@ -143,22 +143,44 @@ public class DrawerActivity extends ActionBarActivity {
     }
 
     public void doSearch() throws UnsupportedEncodingException {
-        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(edtSeach.getText().toString(), "UTF-8"),10,0,catId);
+        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(edtSeach.getText().toString(), "UTF-8"), 10, 0, catId);
     }
 
 
     // Выдача результатов поиска
     public void onSearchResultDownloaded() {
         if (mode == 1) {
-            if (mContentAdapter==null)
+            if (mContentAdapter == null) {
                 mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+            }
             ListView lv = ((ListView) findViewById(R.id.search_result));
-            if (lv.getAdapter()==null)
+            if (lv.getAdapter() == null) {
                 lv.setAdapter(mContentAdapter);
-            else mContentAdapter.notifyDataSetChanged();
+                lv.setOnItemClickListener(this);
+            } else mContentAdapter.notifyDataSetChanged();
         }
     }
 
+    //
+    // Нажатие на книжку
+    //
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        //int yScroll = ((ListView) findViewById(R.id.search_result)).getScrollY();
+        positionOfSelection = i;
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+        ((ListView) findViewById(R.id.search_result)).setAdapter(mContentAdapter);
+        mContentAdapter.notifyDataSetChanged();
+        ((ListView) findViewById(R.id.search_result)).setOnItemClickListener(this);
+        ((ListView) findViewById(R.id.search_result)).setSelection(positionOfSelection);
+
+    }
+
+    int positionOfSelection=-1;
+
+    //
+    // Адаптер книжек
+    //
     class ContentAdapter extends ArrayAdapter {
         private final Activity activity;
         private final List<String> list;
@@ -175,31 +197,59 @@ public class DrawerActivity extends ActionBarActivity {
             View rowView = convertView;
             ViewHolder view;
 
-            if (rowView == null) {
+            if (true){//(rowView == null) {
                 // Get a new instance of the row layout view
-                LayoutInflater inflater = activity.getLayoutInflater();
-                rowView = inflater.inflate(R.layout.book_layout, null);
+                if (positionOfSelection != position) {
+                    LayoutInflater inflater = activity.getLayoutInflater();
+                    rowView = inflater.inflate(R.layout.book_layout, null);
 
-                // Hold the view objects in an object, that way the don't need to be "re-  finded"
-                view = new ViewHolder();
-                view.textView = (TextView) rowView.findViewById(R.id.title);
-                //view.imageView = (ImageView) rowView.findViewById(R.id.rowImage);
+                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
+                    view = new ViewHolder();
+                    view.textView = (TextView) rowView.findViewById(R.id.title);
 
-                rowView.setTag(view);
+                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
+                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
+
+                    rowView.setTag(view);
+                }
+                else {
+                    LayoutInflater inflater = activity.getLayoutInflater();
+                    rowView = inflater.inflate(R.layout.book_opened_layout, null);
+
+                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
+                    view = new ViewHolder();
+                    view.textView = (TextView) rowView.findViewById(R.id.title);
+
+                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
+                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
+                    view.sizeView = (TextView) rowView.findViewById(R.id.sizeText);
+                    rowView.setTag(view);
+                }
+
             } else {
                 view = (ViewHolder) rowView.getTag();
             }
 
+
             /** Set data to your Views. */
             Book item = BackgroundLoader.loadedBooks.get(position);
             view.textView.setText(item.name);
+            view.authorsTextView.setText(item.getAuthorsToString());
+            if (view.sizeView!=null)
+                view.sizeView.setText("Размер: "+item.size);
+            // Круголь цветной
+            Drawable drawable = getResources().getDrawable(R.drawable.circle);
+            drawable.setColorFilter(Color.parseColor("#" + item.category.colorHex), PorterDuff.Mode.SRC_ATOP);
 
+            view.imageView.setImageDrawable(drawable);
             return rowView;
         }
 
         protected class ViewHolder {
             protected TextView textView;
             protected ImageView imageView;
+            protected TextView authorsTextView;
+            protected TextView sizeView;
         }
     }
 //endregion
@@ -234,6 +284,7 @@ public class DrawerActivity extends ActionBarActivity {
         // Подключение к АПИ книжечек
         new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
         BackgroundLoader.startLoadingCats();
+
     }
 
     public void onCatsDownloaded() {
@@ -321,16 +372,16 @@ public class DrawerActivity extends ActionBarActivity {
                             }
                         }
                         Fragment fragment = null;
-                        if (drawerItem!=null && drawerItem.getIdentifier()!=0)
-                        switch (drawerItem.getIdentifier()) {
-                            case 1:
-                                fragment = new SearchFragment();
-                                mode = 1;
-                                break;
-                            default:
-                                break;
+                        if (drawerItem != null && drawerItem.getIdentifier() != 0)
+                            switch (drawerItem.getIdentifier()) {
+                                case 1:
+                                    fragment = new SearchFragment();
+                                    mode = 1;
+                                    break;
+                                default:
+                                    break;
 
-                        }
+                            }
                         if (fragment != null) {
                             FragmentManager fragmentManager = getSupportFragmentManager();
                             fragmentManager.beginTransaction()
@@ -354,6 +405,15 @@ public class DrawerActivity extends ActionBarActivity {
                 });
         mDrawer.build();
 
+
+        // Открыть фрагмент поиска по умолчанию
+
+        Fragment fragment = new SearchFragment();
+        mode = 1;
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment).commit();
+        setTitle("Поиск");
 
         //TextView tx = (TextView)vi.findViewById(R.id.headertext);
         //tx.setText("fysdjkfhjsdhfsd");//(Account.name);

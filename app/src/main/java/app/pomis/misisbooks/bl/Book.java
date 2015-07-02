@@ -16,5 +16,11 @@ public class Book {
     public Category category;
     public int countDl;
     public boolean fave;
-
+    public String getAuthorsToString(){
+        String str = "";
+        for (int i = 0; i < authors.size(); i++){
+            str += (i>0)?", "+authors.get(i):authors.get(i);
+        }
+        return str;
+    }
 }
