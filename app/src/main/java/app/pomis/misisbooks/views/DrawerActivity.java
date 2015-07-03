@@ -38,6 +38,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.mikepenz.iconics.typeface.FontAwesome;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
@@ -60,6 +61,7 @@ import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
 import app.pomis.misisbooks.bl.Category;
+import app.pomis.misisbooks.bl.PopularsLoader;
 import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.SearchHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
@@ -72,6 +74,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     ContentAdapter mContentAdapter;
     int mode = 0; // 1 поиск
     private Toolbar toolbar;
+
     // Запуск активности
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,10 +121,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     public int catId = 1;
 
 
-
-
-
-
     public void doSearch() throws UnsupportedEncodingException {
         BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(search.getSearchText(), "UTF-8"), 10, 0, catId);
     }
@@ -143,9 +142,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
 
-    public void refresh(){
-        mContentAdapter.notifyDataSetChanged();
+    public void refresh() {
+        onSearchResultDownloaded();
     }
+
     SearchBox search;
 
     //
@@ -199,7 +199,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     e.printStackTrace();
                 }
                 search.addSearchable(new SearchResult(search.getSearchText(), getResources().getDrawable(R.drawable.ic_history)));
-                ((ArrayAdapter)((ListView)search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
+                ((ArrayAdapter) ((ListView) search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
                 mSearchHistory.saveAll(search);
             }
 
@@ -224,15 +224,41 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     protected void closeSearch() {
         search.hideCircularly(this);
-        if(search.getSearchText().isEmpty())toolbar.setTitle("");
+        if (search.getSearchText().isEmpty()) toolbar.setTitle("");
     }
 
     //
-    // Нажатие на книжку
+    // Нажатие на книжку, диалог скачивания
     //
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        refresh();
+        final int index = i;
+        String descr = "";
+        descr = "Авторы: " + BackgroundLoader.loadedBooks.get(i).getAuthorsToString() +
+                "\nКатегория: " + BackgroundLoader.loadedBooks.get(i).category.categoryName +
+                "\nРазмер: " + BackgroundLoader.loadedBooks.get(i).size +
+                "\nСкачано " + BackgroundLoader.loadedBooks.get(i).countDl + " раз.";
+        new MaterialDialog.Builder(this)
+                .title(BackgroundLoader.loadedBooks.get(i).name)
+                .content(descr)
+                .positiveText("Скачать")
+                .neutralText("В избранное")
+                .negativeText("Отмена")
+                .negativeColorAttr(Color.parseColor("#ffffff"))
+                .positiveColorRes(R.color.primaryColor)
+                .neutralColorAttr(Color.parseColor("#ffffff"))
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onNeutral(MaterialDialog dialog) {
+                        super.onNeutral(dialog);
+                        BackgroundLoader.loadedBooks.get(index).fave = true;
+                        BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id);
+                        //fsdfs
+
+                    }
+                })
+                .show();
+        //refresh();
     }
 
 
@@ -257,17 +283,18 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             if (rowView == null) {
                 // Get a new instance of the row layout view
-                    LayoutInflater inflater = activity.getLayoutInflater();
-                    rowView = inflater.inflate(R.layout.book_layout, null);
+                LayoutInflater inflater = activity.getLayoutInflater();
+                rowView = inflater.inflate(R.layout.book_layout, null);
 
-                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
-                    view = new ViewHolder();
-                    view.textView = (TextView) rowView.findViewById(R.id.title);
-
-                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
-                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
-
-                    rowView.setTag(view);
+                // Hold the view objects in an object, that way the don't need to be "re-  finded"
+                view = new ViewHolder();
+                view.textView = (TextView) rowView.findViewById(R.id.title);
+                view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
+                view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
+                view.faveStar = (BackgroundLoader.loadedBooks.get(position).fave) ?
+                        (ImageView) rowView.findViewById(R.id.faveStar) : null;
+//TODO: ЗВЁЗДОЧКА НЕ ОБНОВЛЯЕТСЯ ХЗ ЧО ТАКОЕ
+                rowView.setTag(view);
 
             } else {
                 view = (ViewHolder) rowView.getTag();
@@ -278,13 +305,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             Book item = BackgroundLoader.loadedBooks.get(position);
             view.textView.setText(item.name);
             view.authorsTextView.setText(item.getAuthorsToString());
-            if (view.sizeView!=null)
-                view.sizeView.setText("Размер: "+item.size);
+            if (view.sizeView != null)
+                view.sizeView.setText("Размер: " + item.size);
             // Круголь цветной
             Drawable drawable = getResources().getDrawable(R.drawable.circle);
             drawable.setColorFilter(Color.parseColor("#" + item.category.colorHex), PorterDuff.Mode.SRC_ATOP);
+            if (view.imageView != null)
+                view.imageView.setImageDrawable(drawable);
 
-            view.imageView.setImageDrawable(drawable);
+            if (view.faveStar != null)
+                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);
             return rowView;
         }
 
@@ -293,6 +323,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             protected ImageView imageView;
             protected TextView authorsTextView;
             protected TextView sizeView;
+            protected ImageView faveStar;
         }
     }
 //endregion
@@ -309,7 +340,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
     private Drawer.Result drawerResult = null;
-
 
 
     public void onCatsDownloaded() {

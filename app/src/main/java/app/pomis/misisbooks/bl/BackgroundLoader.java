@@ -29,4 +29,21 @@ public class BackgroundLoader {
                 "&access_token="+Account.getInstance().twosphere_token);
 
     }
+
+    static public void addOrRemoveFromFavs(int i){
+        //edition_id
+        new FaveAdder().execute("http://twosphere.ru/api/fave.addDocument?edition_id="+i+"&access_token="+Account.getInstance().twosphere_token);
+
+    }
+
+    static public Book getBookByServerId(int i){
+        for (Book b: loadedBooks){
+            if (b.id == i){
+                b=b;
+                return b;
+
+            }
+        }
+        return null;
+    }
 }
