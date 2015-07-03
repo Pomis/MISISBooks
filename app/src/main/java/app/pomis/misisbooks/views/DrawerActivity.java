@@ -61,6 +61,7 @@ import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
 import app.pomis.misisbooks.bl.Category;
 import app.pomis.misisbooks.bl.ResourcesLoader;
+import app.pomis.misisbooks.bl.SearchHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
 
@@ -69,14 +70,37 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Drawer mDrawer;
     Fragment fragment;
     ContentAdapter mContentAdapter;
-    //region Поиск
-    private MenuItem mSearchAction;
-    private boolean isSearchOpened = false;
-    private EditText edtSeach;
-    public int catId = 1;
     int mode = 0; // 1 поиск
     private Toolbar toolbar;
+    // Запуск активности
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_drawer);
+        String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token;
+        singleton = this;
+        // Подключение к АПИ книжечек
+        new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
+        BackgroundLoader.startLoadingCats();
 
+        // Поиск
+        search = (SearchBox) findViewById(R.id.searchbox);
+        search.enableVoiceRecognition(this);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                openSearch();
+                return true;
+            }
+        });
+        search.bringToFront();
+        mSearchHistory = new SearchHistory(this);
+        mSearchHistory.loadAdd(search);
+    }
+
+    // Кнопка назад
     @Override
     public void onBackPressed() {
         if (isSearchOpened) {
@@ -85,6 +109,18 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
         super.onBackPressed();
     }
+
+    //region Поиск
+    private MenuItem mSearchAction;
+    SearchHistory mSearchHistory;
+    private boolean isSearchOpened = false;
+    private EditText edtSeach;
+    public int catId = 1;
+
+
+
+
+
 
     public void doSearch() throws UnsupportedEncodingException {
         BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(search.getSearchText(), "UTF-8"), 10, 0, catId);
@@ -109,7 +145,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void refresh(){
         mContentAdapter.notifyDataSetChanged();
-        (findViewById(R.id.spinnerToolbar)).notifyAll();
     }
     SearchBox search;
 
@@ -118,14 +153,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     public void openSearch() {
         toolbar.setTitle("");
+        search.setLogoText("");
         isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);
-        for (int x = 0; x < 10; x++) {
-            SearchResult option = new SearchResult("Result "
-                    + Integer.toString(x), getResources().getDrawable(
-                    R.drawable.ic_history));
-            search.addSearchable(option);
-        }
+
         //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
         search.setMenuListener(new SearchBox.MenuListener() {
 
@@ -162,14 +193,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             public void onSearch(String searchTerm) {
                 Toast.makeText(DrawerActivity.this, searchTerm + " Searched",
                         Toast.LENGTH_LONG).show();
-                //toolbar.setTitle(searchTerm);
                 try {
                     doSearch();
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
+                search.addSearchable(new SearchResult(search.getSearchText(), getResources().getDrawable(R.drawable.ic_history)));
                 ((ArrayAdapter)((ListView)search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
-
+                mSearchHistory.saveAll(search);
             }
 
             @Override
@@ -277,66 +308,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         return singleton;
     }
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    //private NavigationDrawerFragment mNavigationDrawerFragment;
-
-    /**
-     */
-    private CharSequence mTitle;
     private Drawer.Result drawerResult = null;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_drawer);
-        String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token;
-        singleton = this;
-        // Подключение к АПИ книжечек
-        new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
-        BackgroundLoader.startLoadingCats();
 
-        // Поиск
-        search = (SearchBox) findViewById(R.id.searchbox);
-        search.enableVoiceRecognition(this);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        this.setSupportActionBar(toolbar);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                openSearch();
-                return true;
-            }
-        });
-        search.bringToFront();
-        //((ImageButton)search.findViewById(R.id.drawer_logo)).setVisibility(View.INVISIBLE);
-
-    }
 
     public void onCatsDownloaded() {
-//        String[] data = {"fdfs", "dsfsdf", "dsffsdf"};
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, data);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//
-//        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-//        spinner.setAdapter(adapter);
-//        // заголовок
-//        spinner.setPrompt("Title");
-//        // выделяем элемент
-//        spinner.setSelection(2);
-//        // устанавливаем обработчик нажатия
-//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view,
-//                                       int position, long id) {
-//                // показываем позиция нажатого элемента
-//                Toast.makeText(getBaseContext(), "Position = " + position, Toast.LENGTH_SHORT).show();
-//            }
-//            @Override
-//            public void onNothingSelected(AdapterView<?> arg0) {
-//            }
-//        });
     }
 
 
