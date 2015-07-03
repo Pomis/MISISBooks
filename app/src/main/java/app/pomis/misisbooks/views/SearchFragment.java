@@ -35,6 +35,7 @@ import app.pomis.misisbooks.bl.Category;
 
 public class SearchFragment extends Fragment {
     LayoutInflater mLayoutInflater;
+    public CategoryAdapter dataAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,8 +47,8 @@ public class SearchFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Spinner s = (Spinner) getActivity().findViewById(R.id.spinner);
-        CategoryAdapter dataAdapter = new CategoryAdapter(getActivity(), R.layout.custom_spinner, new String[]{"", "", "", "", "", "", "", ""});
+        Spinner s = (Spinner) getActivity().findViewById(R.id.spinnerToolbar);
+        dataAdapter = new CategoryAdapter(getActivity(), R.layout.custom_spinner, new String[]{"", "", "", "", "", "", "", ""});
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(dataAdapter);
         s.setOnItemSelectedListener(
@@ -85,13 +86,6 @@ public class SearchFragment extends Fragment {
             View mySpinner = inflater.inflate(R.layout.custom_spinner, parent, false);
             TextView main_text = (TextView) mySpinner.findViewById(R.id.text_main_seen);
             main_text.setText(Category.arrayList.get(position).categoryName);
-            //TextView subSpinner = (TextView) mySpinner.findViewById(R.id.sub_text_seen);
-            //subSpinner.setText("hbjknmlk kk m");
-            ImageView left_icon = (ImageView) mySpinner.findViewById(R.id.left_pic);
-            //left_icon.setColorFilter();
-            Drawable drawable = getActivity().getResources().getDrawable(R.drawable.circle);
-            drawable.setColorFilter(Color.parseColor("#" + Category.arrayList.get(position).colorHex), PorterDuff.Mode.SRC_ATOP);
-            left_icon.setImageDrawable(drawable);//Resource(R.drawable.cutter);
 
             return mySpinner;
         }

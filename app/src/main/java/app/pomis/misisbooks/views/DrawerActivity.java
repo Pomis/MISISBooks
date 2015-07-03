@@ -27,6 +27,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -66,6 +67,7 @@ import app.pomis.misisbooks.bl.TwoSphereAuth;
 public class DrawerActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
     static DrawerActivity singleton;
     Drawer mDrawer;
+    Fragment fragment;
     ContentAdapter mContentAdapter;
     //region Поиск
     private MenuItem mSearchAction;
@@ -75,85 +77,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     int mode = 0; // 1 поиск
     private Toolbar toolbar;
 
-    protected void handleMenuSearch() {
-        final ActionBar action = getSupportActionBar(); //get the actionbar
-
-        if (isSearchOpened) { //test if the search is open
-
-            action.setDisplayShowCustomEnabled(false); //disable a custom view inside the actionbar
-            action.setDisplayShowTitleEnabled(true); //show the title in the action bar
-
-            //hides the keyboard
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(edtSeach.getWindowToken(), 0);
-
-            //add the search icon in the action bar
-            mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_search_white_24dp));
-            search.setMenuVisibility(View.INVISIBLE);
-            isSearchOpened = false;
-        } else { //open the search entry
-
-            action.setDisplayShowCustomEnabled(true); //enable it to display a
-            // custom view in the action bar.
-            action.setCustomView(R.layout.search_bar);//add the custom view
-            action.setDisplayShowTitleEnabled(false); //hide the title
-
-            edtSeach = (EditText) action.getCustomView().findViewById(R.id.edtSearch); //the text editor
-
-            //this is a listener to do a search when the user clicks on search button
-            edtSeach.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                        try {
-                            doSearch();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
-
-            edtSeach.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (!hasFocus) {
-                        try {
-                            doSearch();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-
-            edtSeach.requestFocus();
-
-            //open the keyboard focused in the edtSearch
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(edtSeach, InputMethodManager.SHOW_IMPLICIT);
-
-            //add the close icon
-            mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_close_white_24dp));
-
-            isSearchOpened = true;
-        }
-
-    }
-
     @Override
     public void onBackPressed() {
         if (isSearchOpened) {
-            handleMenuSearch();
+            closeSearch();
             return;
         }
         super.onBackPressed();
     }
 
     public void doSearch() throws UnsupportedEncodingException {
-        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(edtSeach.getText().toString(), "UTF-8"), 10, 0, catId);
+        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(search.getSearchText(), "UTF-8"), 10, 0, catId);
     }
 
 
@@ -167,11 +101,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             if (lv.getAdapter() == null) {
                 lv.setAdapter(mContentAdapter);
                 lv.setOnItemClickListener(this);
+                mContentAdapter.notifyDataSetChanged();
             } else mContentAdapter.notifyDataSetChanged();
         }
     }
 
 
+    public void refresh(){
+        mContentAdapter.notifyDataSetChanged();
+        (findViewById(R.id.spinnerToolbar)).notifyAll();
+    }
     SearchBox search;
 
     //
@@ -179,6 +118,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     public void openSearch() {
         toolbar.setTitle("");
+        isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);
         for (int x = 0; x < 10; x++) {
             SearchResult option = new SearchResult("Result "
@@ -215,13 +155,20 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             public void onSearchTermChanged() {
                 // React to the search term changing
                 // Called after it has updated results
+//                notifyAll();
             }
 
             @Override
             public void onSearch(String searchTerm) {
                 Toast.makeText(DrawerActivity.this, searchTerm + " Searched",
                         Toast.LENGTH_LONG).show();
-                toolbar.setTitle(searchTerm);
+                //toolbar.setTitle(searchTerm);
+                try {
+                    doSearch();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                ((ArrayAdapter)((ListView)search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
 
             }
 
@@ -254,7 +201,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+        refresh();
     }
 
 
@@ -488,7 +435,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
         // Открыть фрагмент поиска по умолчанию
 
-        Fragment fragment = new SearchFragment();
+
+        fragment = new SearchFragment();
         mode = 1;
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()

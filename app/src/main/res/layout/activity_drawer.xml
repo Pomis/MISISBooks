@@ -14,16 +14,17 @@
         android:layout_width="match_parent"
         android:background="@color/primaryColor"
         android:layout_marginTop="24dp"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
+        <Spinner
+            android:layout_centerVertical="true"
+            android:popupBackground="@color/primaryColorDark"
+            android:layout_width="wrap_content"
+            android:minWidth="20dp"
+            android:layout_height="20dp"
+            android:id="@+id/spinnerToolbar" />
+        </android.support.v7.widget.Toolbar>
 
-    <Spinner
-        android:layout_centerVertical="true"
-        android:popupBackground="#ffffff"
-        android:layout_marginTop="24dp"
-        android:layout_width="wrap_content"
-        android:minWidth="20dp"
-        android:layout_height="20dp"
-        android:id="@+id/spinnerToolbar" />
+
 
     <com.quinny898.library.persistentsearch.SearchBox
         android:layout_width="wrap_content"

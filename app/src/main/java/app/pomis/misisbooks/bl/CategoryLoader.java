@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import app.pomis.misisbooks.views.DrawerActivity;
 
@@ -57,6 +58,7 @@ public class CategoryLoader extends AsyncTask<String, String, String> {
     }
 
     void parseCats(String result) {
+        Category.arrayList = new ArrayList<>();
         try {
             JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
             JSONArray jArray = jObject.getJSONObject("response").getJSONObject("response").getJSONArray("categories");

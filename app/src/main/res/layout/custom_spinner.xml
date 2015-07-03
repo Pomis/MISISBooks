@@ -5,22 +5,14 @@
     android:orientation="vertical"
     android:padding="3px">
 
-    <ImageView
-        android:id="@+id/left_pic"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_centerVertical="true"
-        />
-
     <TextView
         android:id="@+id/text_main_seen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5px"
         android:layout_marginTop="2px"
-        android:layout_toRightOf="@+id/left_pic"
         android:text="Название категории"
-        android:textColor="#ff000000"
-        android:textSize="16dp"
+        android:textColor="#ffffff"
+        android:textSize="18dp"
         android:layout_centerVertical="true"/>
 </RelativeLayout>
