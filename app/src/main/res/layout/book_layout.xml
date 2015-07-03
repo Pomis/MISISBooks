@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="60dp"
+    android:minHeight="72dp"
     android:background="@drawable/card_listed"
     >
 
@@ -14,16 +14,16 @@
         android:minHeight="40dp"
         android:minWidth="40dp"
         android:layout_margin="16dp"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:minWidth="200dp"
         android:layout_height="wrap_content"
         android:id="@+id/title"
-        android:textColor="#000000"
+        android:textColor="@color/title"
         android:text="Без названия"
-        android:textStyle="bold"
         android:layout_alignParentTop="true"
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@+id/imageView"
@@ -37,7 +37,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -46,7 +46,7 @@
         android:minWidth="200dp"
         android:layout_height="wrap_content"
         android:id="@+id/subText"
-        android:textColor="#000000"
+        android:textColor="@color/subTitle"
         android:text="Нет автора"
         android:layout_below="@+id/title"
         android:layout_alignLeft="@+id/title"

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-maven'
 
 android {
     compileSdkVersion 22
@@ -25,4 +26,8 @@ dependencies {
     compile('com.mikepenz.materialdrawer:library:0.9.5@aar') {
         transitive = true
     }
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.android.support:design:22.2.0'
+    compile 'com.quinny898.library.persistentsearch:library:1.0.0-SNAPSHOT'
+    compile 'com.jakewharton:butterknife:6.0.0'
 }

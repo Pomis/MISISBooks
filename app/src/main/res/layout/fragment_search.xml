@@ -12,14 +12,14 @@
         <LinearLayout
 
             android:layout_width="fill_parent"
-            android:layout_height="40dp"
+            android:layout_height="48dp"
             android:background="@drawable/card_listed"
             >
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#000000"
+                android:textColor="@color/title"
                 android:layout_centerVertical="true"
                 android:layout_marginTop="8dp"
                 android:layout_marginLeft="16dp"
@@ -37,6 +37,8 @@
         <ListView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:id="@+id/search_result" />
+            android:id="@+id/search_result"
+            android:longClickable="true"
+            android:clickable="true"/>
     </LinearLayout>
 </FrameLayout>

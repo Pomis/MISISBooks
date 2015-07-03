@@ -2,9 +2,13 @@ package app.pomis.misisbooks.views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.speech.RecognizerIntent;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -17,8 +21,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -40,9 +46,12 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Badgeable;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import com.quinny898.library.persistentsearch.SearchBox;
+import com.quinny898.library.persistentsearch.SearchResult;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import app.pomis.misisbooks.R;
@@ -64,6 +73,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     private EditText edtSeach;
     public int catId = 1;
     int mode = 0; // 1 поиск
+    private Toolbar toolbar;
 
     protected void handleMenuSearch() {
         final ActionBar action = getSupportActionBar(); //get the actionbar
@@ -79,7 +89,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             //add the search icon in the action bar
             mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_search_white_24dp));
-
+            search.setMenuVisibility(View.INVISIBLE);
             isSearchOpened = false;
         } else { //open the search entry
 
@@ -161,22 +171,92 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
     }
 
+
+    SearchBox search;
+
+    //
+    // Гмейловый поиск
+    //
+    public void openSearch() {
+        toolbar.setTitle("");
+        search.revealFromMenuItem(R.id.action_search, this);
+        for (int x = 0; x < 10; x++) {
+            SearchResult option = new SearchResult("Result "
+                    + Integer.toString(x), getResources().getDrawable(
+                    R.drawable.ic_history));
+            search.addSearchable(option);
+        }
+        //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
+        search.setMenuListener(new SearchBox.MenuListener() {
+
+            @Override
+            public void onMenuClick() {
+                // Hamburger has been clicked
+                Toast.makeText(DrawerActivity.this, "Menu click",
+                        Toast.LENGTH_LONG).show();
+            }
+
+        });
+        search.setSearchListener(new SearchBox.SearchListener() {
+
+            @Override
+            public void onSearchOpened() {
+                // Use this to tint the screen
+
+            }
+
+            @Override
+            public void onSearchClosed() {
+                // Use this to un-tint the screen
+                closeSearch();
+            }
+
+            @Override
+            public void onSearchTermChanged() {
+                // React to the search term changing
+                // Called after it has updated results
+            }
+
+            @Override
+            public void onSearch(String searchTerm) {
+                Toast.makeText(DrawerActivity.this, searchTerm + " Searched",
+                        Toast.LENGTH_LONG).show();
+                toolbar.setTitle(searchTerm);
+
+            }
+
+            @Override
+            public void onSearchCleared() {
+
+            }
+
+        });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1234 && resultCode == RESULT_OK) {
+            ArrayList<String> matches = data
+                    .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            search.populateEditText(matches);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    protected void closeSearch() {
+        search.hideCircularly(this);
+        if(search.getSearchText().isEmpty())toolbar.setTitle("");
+    }
+
     //
     // Нажатие на книжку
     //
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        //int yScroll = ((ListView) findViewById(R.id.search_result)).getScrollY();
-        positionOfSelection = i;
-        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
-        ((ListView) findViewById(R.id.search_result)).setAdapter(mContentAdapter);
-        mContentAdapter.notifyDataSetChanged();
-        ((ListView) findViewById(R.id.search_result)).setOnItemClickListener(this);
-        ((ListView) findViewById(R.id.search_result)).setSelection(positionOfSelection);
 
     }
 
-    int positionOfSelection=-1;
 
     //
     // Адаптер книжек
@@ -197,9 +277,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             View rowView = convertView;
             ViewHolder view;
 
-            if (true){//(rowView == null) {
+            if (rowView == null) {
                 // Get a new instance of the row layout view
-                if (positionOfSelection != position) {
                     LayoutInflater inflater = activity.getLayoutInflater();
                     rowView = inflater.inflate(R.layout.book_layout, null);
 
@@ -211,20 +290,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
 
                     rowView.setTag(view);
-                }
-                else {
-                    LayoutInflater inflater = activity.getLayoutInflater();
-                    rowView = inflater.inflate(R.layout.book_opened_layout, null);
-
-                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
-                    view = new ViewHolder();
-                    view.textView = (TextView) rowView.findViewById(R.id.title);
-
-                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
-                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
-                    view.sizeView = (TextView) rowView.findViewById(R.id.sizeText);
-                    rowView.setTag(view);
-                }
 
             } else {
                 view = (ViewHolder) rowView.getTag();
@@ -284,6 +349,21 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         // Подключение к АПИ книжечек
         new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
         BackgroundLoader.startLoadingCats();
+
+        // Поиск
+        search = (SearchBox) findViewById(R.id.searchbox);
+        search.enableVoiceRecognition(this);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                openSearch();
+                return true;
+            }
+        });
+        search.bringToFront();
+        //((ImageButton)search.findViewById(R.id.drawer_logo)).setVisibility(View.INVISIBLE);
 
     }
 
@@ -440,7 +520,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             return true;
         }
         if (id == R.id.action_search) {
-            handleMenuSearch();
+            //handleMenuSearch();
+            openSearch();
             return true;
         }
         return super.onOptionsItemSelected(item);
