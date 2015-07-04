@@ -133,94 +133,37 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     // Выдача результатов поиска
     public void onSearchResultDownloaded() {
-        if (mode == 1) {
-            //View view = getLayoutInflater().inflate(R.layout.list_header, null);
-
-            ((TextView)findViewById(R.id.headerTitle)).setText("Результаты поиска");
-            if (mContentAdapter == null) {
-                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
-            }
-            ListView lv = ((ListView) findViewById(R.id.search_result));
+        if (mContentAdapter == null) {
+            mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+        }
+        ListView lv = ((ListView) findViewById(R.id.search_result));
 //            lv.addHeaderView(view);
 //            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Результаты поиска");
-            if (lv.getAdapter() == null) {
+        if (lv.getAdapter() == null) {
 
-                lv.setAdapter(mContentAdapter);
-                lv.setOnItemClickListener(this);
-                mContentAdapter.notifyDataSetChanged();
-            } else mContentAdapter.notifyDataSetChanged();
-            setListViewHeightBasedOnChildren(lv);
-            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-            if (BackgroundLoader.loadedBooks.size()>9)
-                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
-                //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
+            lv.setAdapter(mContentAdapter);
+            lv.setOnItemClickListener(this);
+            mContentAdapter.notifyDataSetChanged();
+        } else mContentAdapter.notifyDataSetChanged();
+        setListViewHeightBasedOnChildren(lv);
 
+        if (BackgroundLoader.loadedBooks.size() > 9)
+            findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+        switch (mode) {
+            case 1:
+                ((TextView) findViewById(R.id.headerTitle)).setText("Результаты поиска");
+                break;
+            case 3:
+                ((TextView) findViewById(R.id.headerTitle)).setText("Избранное");
+                break;
+            case 5:
+                ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за неделю");
+                break;
+            case 6:
+                ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за всё время");
+                break;
         }
-        else if (mode == 3) {
-          //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
-
-            ((TextView)findViewById(R.id.headerTitle)).setText("Избранное");
-            if (mContentAdapter == null) {
-                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
-            }
-            ListView lv = ((ListView) findViewById(R.id.search_result));
-//            lv.addHeaderView(view);
-//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
-            if (lv.getAdapter() == null) {
-                lv.setAdapter(mContentAdapter);
-                lv.setOnItemClickListener(this);
-                mContentAdapter.notifyDataSetChanged();
-            } else mContentAdapter.notifyDataSetChanged();
-            setListViewHeightBasedOnChildren(lv);
-            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-            if (BackgroundLoader.loadedBooks.size()>9)
-                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
-            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
-        }
-
-        else if (mode == 5) {
-            //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
-
-            ((TextView)findViewById(R.id.headerTitle)).setText("Популярное за неделю");
-            if (mContentAdapter == null) {
-                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
-            }
-            ListView lv = ((ListView) findViewById(R.id.search_result));
-//            lv.addHeaderView(view);
-//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
-            if (lv.getAdapter() == null) {
-                lv.setAdapter(mContentAdapter);
-                lv.setOnItemClickListener(this);
-                mContentAdapter.notifyDataSetChanged();
-            } else mContentAdapter.notifyDataSetChanged();
-            setListViewHeightBasedOnChildren(lv);
-            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-            if (BackgroundLoader.loadedBooks.size()>9)
-                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
-            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
-        }
-
-        else if (mode == 6) {
-            //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
-
-            ((TextView)findViewById(R.id.headerTitle)).setText("Популярное за всё время");
-            if (mContentAdapter == null) {
-                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
-            }
-            ListView lv = ((ListView) findViewById(R.id.search_result));
-//            lv.addHeaderView(view);
-//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
-            if (lv.getAdapter() == null) {
-                lv.setAdapter(mContentAdapter);
-                lv.setOnItemClickListener(this);
-                mContentAdapter.notifyDataSetChanged();
-            } else mContentAdapter.notifyDataSetChanged();
-            setListViewHeightBasedOnChildren(lv);
-            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-            if (BackgroundLoader.loadedBooks.size()>9)
-                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
-            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
-        }
+        ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
 
         //TODO: необходим рефактор метода!!!!!!! и реорганизация айдишников 1 2 3 4 5...
 
@@ -238,20 +181,22 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mContentAdapter.notifyDataSetChanged();
     }
 
-    public void setListViewHeightBasedOnChildren(ListView listView) {
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
-            // pre-condition
             return;
         }
-
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
         int totalHeight = 0;
+        View view = null;
         for (int i = 0; i < listAdapter.getCount(); i++) {
-            View listItem = listAdapter.getView(i, null, listView);
-            listItem.measure(0, 0);
-            totalHeight += listItem.getMeasuredHeight()+15;
+            view = listAdapter.getView(i, view, listView);
+            if (i == 0) {
+                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, ListView.LayoutParams.WRAP_CONTENT));
+            }
+            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += view.getMeasuredHeight();
         }
-
         ViewGroup.LayoutParams params = listView.getLayoutParams();
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
         listView.setLayoutParams(params);
@@ -376,10 +321,21 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void setCatId(int id) {
         catId = id;
-        if (mode == 3){
-            if (mContentAdapter!=null) mContentAdapter.clear();
+        if (mContentAdapter != null && mode==3) {
+            mContentAdapter.clear();
             BackgroundLoader.startLoadingFavs(catId, 0, 10);
         }
+        if (mContentAdapter != null && mode==5) {
+            mContentAdapter.clear();
+            BackgroundLoader.startLoadingPopularForWeek(catId, 0, 10);
+        }
+        if (mContentAdapter != null && mode==6) {
+            mContentAdapter.clear();
+            BackgroundLoader.startLoadingPopular(catId, 0, 10);
+        }
+//        if (mode == 3){
+//            if (mContentAdapter!=null)
+//        }
     }
 
 
