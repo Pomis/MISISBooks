@@ -33,7 +33,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +53,8 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.quinny898.library.persistentsearch.SearchBox;
 import com.quinny898.library.persistentsearch.SearchResult;
+
+import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -129,19 +134,101 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     // Выдача результатов поиска
     public void onSearchResultDownloaded() {
         if (mode == 1) {
+            //View view = getLayoutInflater().inflate(R.layout.list_header, null);
+
+            ((TextView)findViewById(R.id.headerTitle)).setText("Результаты поиска");
             if (mContentAdapter == null) {
                 mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
             }
             ListView lv = ((ListView) findViewById(R.id.search_result));
+//            lv.addHeaderView(view);
+//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Результаты поиска");
+            if (lv.getAdapter() == null) {
+
+                lv.setAdapter(mContentAdapter);
+                lv.setOnItemClickListener(this);
+                mContentAdapter.notifyDataSetChanged();
+            } else mContentAdapter.notifyDataSetChanged();
+            setListViewHeightBasedOnChildren(lv);
+            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
+            if (BackgroundLoader.loadedBooks.size()>9)
+                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+                //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
+
+        }
+        else if (mode == 3) {
+          //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
+
+            ((TextView)findViewById(R.id.headerTitle)).setText("Избранное");
+            if (mContentAdapter == null) {
+                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+            }
+            ListView lv = ((ListView) findViewById(R.id.search_result));
+//            lv.addHeaderView(view);
+//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
             if (lv.getAdapter() == null) {
                 lv.setAdapter(mContentAdapter);
                 lv.setOnItemClickListener(this);
                 mContentAdapter.notifyDataSetChanged();
             } else mContentAdapter.notifyDataSetChanged();
+            setListViewHeightBasedOnChildren(lv);
+            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
+            if (BackgroundLoader.loadedBooks.size()>9)
+                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
         }
+
+        else if (mode == 5) {
+            //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
+
+            ((TextView)findViewById(R.id.headerTitle)).setText("Популярное за неделю");
+            if (mContentAdapter == null) {
+                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+            }
+            ListView lv = ((ListView) findViewById(R.id.search_result));
+//            lv.addHeaderView(view);
+//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
+            if (lv.getAdapter() == null) {
+                lv.setAdapter(mContentAdapter);
+                lv.setOnItemClickListener(this);
+                mContentAdapter.notifyDataSetChanged();
+            } else mContentAdapter.notifyDataSetChanged();
+            setListViewHeightBasedOnChildren(lv);
+            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
+            if (BackgroundLoader.loadedBooks.size()>9)
+                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
+        }
+
+        else if (mode == 6) {
+            //  View view = getLayoutInflater().inflate(R.layout.list_header, null);
+
+            ((TextView)findViewById(R.id.headerTitle)).setText("Популярное за всё время");
+            if (mContentAdapter == null) {
+                mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+            }
+            ListView lv = ((ListView) findViewById(R.id.search_result));
+//            lv.addHeaderView(view);
+//            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Избранное");
+            if (lv.getAdapter() == null) {
+                lv.setAdapter(mContentAdapter);
+                lv.setOnItemClickListener(this);
+                mContentAdapter.notifyDataSetChanged();
+            } else mContentAdapter.notifyDataSetChanged();
+            setListViewHeightBasedOnChildren(lv);
+            ((ScrollView)findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
+            if (BackgroundLoader.loadedBooks.size()>9)
+                findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+            //TODO: тут тупо плейсхолдер. Когда будешь делать загрузку, попроавь условие
+        }
+
+        //TODO: необходим рефактор метода!!!!!!! и реорганизация айдишников 1 2 3 4 5...
+
+
     }
 
 
+    // Обновление содержимого
     public void refresh() {
         //mContentAdapter.clear();
         mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
@@ -149,6 +236,26 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         lv.setAdapter(mContentAdapter);
         lv.setOnItemClickListener(this);
         mContentAdapter.notifyDataSetChanged();
+    }
+
+    public void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            // pre-condition
+            return;
+        }
+
+        int totalHeight = 0;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight()+15;
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
     }
 
     SearchBox search;
@@ -196,9 +303,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             @Override
             public void onSearch(String searchTerm) {
-                Toast.makeText(DrawerActivity.this, searchTerm + " Searched",
-                        Toast.LENGTH_LONG).show();
+                mode = 1;
                 try {
+
                     doSearch();
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -265,6 +372,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 })
                 .show();
         //refresh();
+    }
+
+    public void setCatId(int id) {
+        catId = id;
+        if (mode == 3){
+            if (mContentAdapter!=null) mContentAdapter.clear();
+            BackgroundLoader.startLoadingFavs(catId, 0, 10);
+        }
     }
 
 
@@ -351,6 +466,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
 
+    //
+    // Navigation Drawer, фрагмент по умолчанию
+    //
     public void onResDownloaded() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -368,6 +486,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 .withHeader(vi)
                 .addDrawerItems(
                         new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(6),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(7),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
                         new DividerDrawerItem(),
@@ -416,6 +536,20 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     fragment = new SearchFragment();
                                     mode = 1;
                                     break;
+                                case 3:
+                                    fragment = new SearchFragment();
+                                    mode = 3;
+                                    BackgroundLoader.startLoadingFavs(1, 0, 10);
+                                    break;
+                                case 6:
+                                    fragment = new SearchFragment();
+                                    mode = 5;
+                                    BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+                                    break;
+                                case 7:
+                                    fragment = new SearchFragment();
+                                    mode = 6;
+                                    BackgroundLoader.startLoadingPopular(1, 0, 10);
                                 default:
                                     break;
 

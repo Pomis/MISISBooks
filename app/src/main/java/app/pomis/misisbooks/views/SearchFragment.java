@@ -55,7 +55,7 @@ public class SearchFragment extends Fragment {
                 new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        DrawerActivity.getInstance().catId=Category.arrayList.get(i).id;
+                        DrawerActivity.getInstance().setCatId(Category.arrayList.get(i).id);
                     }
 
                     @Override

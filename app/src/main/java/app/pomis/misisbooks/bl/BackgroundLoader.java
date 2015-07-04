@@ -36,6 +36,10 @@ public class BackgroundLoader {
 
     }
 
+    static public void startLoadingFavs(int id, int offset, int count){
+        new PopularsLoader().execute("http://twosphere.ru/api/fave.getDocuments?count="+count+"&offset="+offset+"&category="+id+"&fields=all"+
+                "&access_token="+Account.getInstance().twosphere_token);
+    }
     static public Book getBookByServerId(int i){
         for (Book b: loadedBooks){
             if (b.id == i){
