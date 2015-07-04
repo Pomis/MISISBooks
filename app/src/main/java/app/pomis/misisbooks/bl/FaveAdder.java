@@ -57,8 +57,8 @@ public class FaveAdder extends AsyncTask<String, String, String> {
         super.onPostExecute(result);
         Log.d("435678", "Response: " + result);
         parseStuff(result);
-        DrawerActivity.getInstance().onSearchResultDownloaded();
-        DrawerActivity.getInstance().refresh();
+        //DrawerActivity.getInstance().onSearchResultDownloaded();
+        //DrawerActivity.getInstance().refresh();
         Toast.makeText(DrawerActivity.getInstance(), success, Toast.LENGTH_SHORT).show();
     }
 

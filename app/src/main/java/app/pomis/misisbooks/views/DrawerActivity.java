@@ -143,7 +143,12 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
 
     public void refresh() {
-        onSearchResultDownloaded();
+        //mContentAdapter.clear();
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+        ListView lv = ((ListView) findViewById(R.id.search_result));
+        lv.setAdapter(mContentAdapter);
+        lv.setOnItemClickListener(this);
+        mContentAdapter.notifyDataSetChanged();
     }
 
     SearchBox search;
@@ -253,6 +258,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         super.onNeutral(dialog);
                         BackgroundLoader.loadedBooks.get(index).fave = true;
                         BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id);
+                        refresh();
                         //fsdfs
 
                     }
@@ -293,7 +299,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
                 view.faveStar = (BackgroundLoader.loadedBooks.get(position).fave) ?
                         (ImageView) rowView.findViewById(R.id.faveStar) : null;
-//TODO: ЗВЁЗДОЧКА НЕ ОБНОВЛЯЕТСЯ ХЗ ЧО ТАКОЕ
                 rowView.setTag(view);
 
             } else {
