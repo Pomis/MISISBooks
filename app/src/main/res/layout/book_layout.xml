@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.andexert.library.RippleView
-    xmlns:ripple="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/more"
-    android:layout_width="wrap_content"
+<com.balysv.materialripple.MaterialRippleLayout
+    android:id="@+id/ripple"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_toLeftOf="@+id/more2"
-    android:layout_margin="5dp"
-    ripple:rv_color="@color/primaryColor"
-    ripple:rv_type="rectangle"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:mrl_rippleOverlay="true"
+    app:mrl_rippleInAdapter="true"
+    app:mrl_rippleColor="@color/primaryColor"
+    >
 <RelativeLayout
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -49,7 +49,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="16dp"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -65,4 +66,4 @@
         android:paddingBottom="8dp"/>
 
 
-</RelativeLayout></com.andexert.library.RippleView>
+</RelativeLayout></com.balysv.materialripple.MaterialRippleLayout>

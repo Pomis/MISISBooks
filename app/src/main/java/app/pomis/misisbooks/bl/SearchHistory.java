@@ -10,6 +10,7 @@ import com.quinny898.library.persistentsearch.SearchResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import app.pomis.misisbooks.R;
 
@@ -35,9 +36,11 @@ public class SearchHistory {
     public void loadAdd(SearchBox search){
         search.clearSearchable();
         ArrayList<String> list = getListString("keys");
+        list = new ArrayList<String>(new HashSet<String>(list));
         for (String value: list){
             search.addSearchable(new SearchResult(value, context.getResources().getDrawable(R.drawable.ic_history)));
         }
+
     }
 
     public void saveAll(SearchBox search){

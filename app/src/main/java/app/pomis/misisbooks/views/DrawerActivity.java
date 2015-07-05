@@ -42,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.mikepenz.iconics.typeface.FontAwesome;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
@@ -195,6 +196,12 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, ListView.LayoutParams.WRAP_CONTENT));
             }
             view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+
+            // Применение Ripple-effect
+//            MaterialRippleLayout.on(view)
+//                    .rippleColor(Color.BLACK)
+//                    .create();
+
             totalHeight += view.getMeasuredHeight();
         }
         ViewGroup.LayoutParams params = listView.getLayoutParams();
@@ -368,8 +375,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 view.textView = (TextView) rowView.findViewById(R.id.title);
                 view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
                 view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
-                view.faveStar = (BackgroundLoader.loadedBooks.get(position).fave) ?
-                        (ImageView) rowView.findViewById(R.id.faveStar) : null;
+                view.faveStar = (ImageView) rowView.findViewById(R.id.faveStar);
                 rowView.setTag(view);
 
             } else {
@@ -380,6 +386,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             /** Set data to your Views. */
             Book item = BackgroundLoader.loadedBooks.get(position);
             view.textView.setText(item.name);
+
             view.authorsTextView.setText(item.getAuthorsToString());
             if (view.sizeView != null)
                 view.sizeView.setText("Размер: " + item.size);
@@ -389,8 +396,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             if (view.imageView != null)
                 view.imageView.setImageDrawable(drawable);
 
-            if (view.faveStar != null)
-                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);
+            if (view.faveStar != null && item.fave){
+                view.faveStar.setVisibility(View.VISIBLE);
+                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);}
             return rowView;
         }
 

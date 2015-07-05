@@ -31,7 +31,7 @@
                     android:layout_centerVertical="true"
                     android:textColor="@color/subTitle"
                     android:id="@+id/headerTitle"
-                    android:text="Выберите категорию и нажмите на иконку поиска" />
+                    android:text="@string/defaultSearchText" />
             </RelativeLayout>
 
             <ListView

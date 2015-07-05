@@ -17,7 +17,7 @@
         android:layout_height="wrap_content">
         <Spinner
             android:layout_centerVertical="true"
-            android:popupBackground="@color/primaryColorDark"
+            android:popupBackground="#ff434343"
             android:layout_width="wrap_content"
             android:minWidth="20dp"
             android:layout_height="20dp"
@@ -35,7 +35,8 @@
         android:layout_marginLeft="-6dp"
         android:layout_marginRight="-6dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        />
 
     <FrameLayout
         android:id="@+id/content_frame"
