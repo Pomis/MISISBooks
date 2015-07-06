@@ -65,6 +65,7 @@ public class SearchFragment extends Fragment {
                 }
         );
     }
+    //TODO: Новый фрагмент поиска с кустомизацией выдачи (количество позций)
 
     public class CategoryAdapter extends ArrayAdapter<String> {
         public CategoryAdapter(Context ctx, int txtViewResourceId, String[] objects) {

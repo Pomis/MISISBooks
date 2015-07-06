@@ -7,55 +7,39 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.speech.RecognizerIntent;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.balysv.materialripple.MaterialRippleLayout;
 import com.mikepenz.iconics.typeface.FontAwesome;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
-import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Badgeable;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.quinny898.library.persistentsearch.SearchBox;
 import com.quinny898.library.persistentsearch.SearchResult;
-
-import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -66,9 +50,6 @@ import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
-import app.pomis.misisbooks.bl.Category;
-import app.pomis.misisbooks.bl.PopularsLoader;
-import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.SearchHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
@@ -79,6 +60,12 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Fragment fragment;
     ContentAdapter mContentAdapter;
     int mode = 0; // 1 поиск
+    class Modes {
+        static public final int SEARCH = 1;
+        static public final int POPULAR = 2;
+        static public final int POPULAR_WEEK = 3;
+        static public final int FAVS = 4;
+    }
     private Toolbar toolbar;
 
     // Запуск активности
@@ -91,6 +78,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         // Подключение к АПИ книжечек
         new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
         BackgroundLoader.startLoadingCats();
+
 
         // Поиск
         search = (SearchBox) findViewById(R.id.searchbox);
@@ -107,6 +95,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         search.bringToFront();
         mSearchHistory = new SearchHistory(this);
         mSearchHistory.loadAdd(search);
+        setTitle("");
     }
 
     // Кнопка назад
@@ -151,23 +140,20 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         if (BackgroundLoader.loadedBooks.size() > 9)
             findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
         switch (mode) {
-            case 1:
+            case Modes.SEARCH:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Результаты поиска");
                 break;
-            case 3:
+            case Modes.FAVS:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Избранное");
                 break;
-            case 5:
+            case Modes.POPULAR_WEEK:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за неделю");
                 break;
-            case 6:
+            case Modes.POPULAR:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за всё время");
                 break;
         }
         ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
-
-        //TODO: необходим рефактор метода!!!!!!! и реорганизация айдишников 1 2 3 4 5...
-
 
     }
 
@@ -255,7 +241,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             @Override
             public void onSearch(String searchTerm) {
-                mode = 1;
+                mode = Modes.SEARCH;
                 try {
 
                     doSearch();
@@ -328,15 +314,15 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void setCatId(int id) {
         catId = id;
-        if (mContentAdapter != null && mode==3) {
+        if (mContentAdapter != null && mode==Modes.FAVS) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingFavs(catId, 0, 10);
         }
-        if (mContentAdapter != null && mode==5) {
+        if (mContentAdapter != null && mode==Modes.POPULAR_WEEK) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingPopularForWeek(catId, 0, 10);
         }
-        if (mContentAdapter != null && mode==6) {
+        if (mContentAdapter != null && mode==Modes.POPULAR) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingPopular(catId, 0, 10);
         }
@@ -449,9 +435,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 .withActionBarDrawerToggle(true)
                 .withHeader(vi)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(6),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(7),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
                         new DividerDrawerItem(),
@@ -498,22 +484,22 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             switch (drawerItem.getIdentifier()) {
                                 case 1:
                                     fragment = new SearchFragment();
-                                    mode = 1;
+                                    mode = Modes.SEARCH;
                                     break;
                                 case 3:
                                     fragment = new SearchFragment();
-                                    mode = 3;
-                                    BackgroundLoader.startLoadingFavs(1, 0, 10);
+                                    mode = Modes.FAVS;
+                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingFavs(1, 0, 10);
                                     break;
                                 case 6:
                                     fragment = new SearchFragment();
-                                    mode = 5;
-                                    BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+                                    mode = Modes.POPULAR_WEEK;
+                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
                                     break;
                                 case 7:
                                     fragment = new SearchFragment();
-                                    mode = 6;
-                                    BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    mode = Modes.POPULAR;
+                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingPopular(1, 0, 10);
                                 default:
                                     break;
 
@@ -526,6 +512,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             // Highlight the selected item, update the title, and close the drawer
 
                             setTitle(DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()));
+
+                             //
                         }
                     }
                 })
@@ -546,16 +534,26 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
 
         fragment = new SearchFragment();
-        mode = 1;
+        mode = Modes.POPULAR_WEEK;
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment).commit();
-        setTitle("Поиск");
+        BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+
+
+        //setTitle("Поиск");
 
         //TextView tx = (TextView)vi.findViewById(R.id.headertext);
         //tx.setText("fysdjkfhjsdhfsd");//(Account.name);
 
 
+    }
+
+    @Override
+    public void onAttachFragment(android.app.Fragment fragment) {
+        super.onAttachFragment(fragment);
+        if (mode == Modes.SEARCH)
+            ((TextView)findViewById(R.id.headerTitle)).setText("Выберите категорию и начните поиск");
     }
 
     @Override
