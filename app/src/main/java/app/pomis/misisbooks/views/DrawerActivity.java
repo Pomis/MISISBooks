@@ -59,7 +59,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Drawer mDrawer;
     Fragment fragment;
     ContentAdapter mContentAdapter;
-    int mode = 0; // 1 поиск
+    public int mode = 0; // 1 поиск
     class Modes {
         static public final int SEARCH = 1;
         static public final int POPULAR = 2;
