@@ -60,12 +60,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Fragment fragment;
     ContentAdapter mContentAdapter;
     public int mode = 0; // 1 поиск
+
     class Modes {
         static public final int SEARCH = 1;
         static public final int POPULAR = 2;
         static public final int POPULAR_WEEK = 3;
         static public final int FAVS = 4;
     }
+
     private Toolbar toolbar;
 
     // Запуск активности
@@ -292,8 +294,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 .title(BackgroundLoader.loadedBooks.get(i).name)
                 .content(descr)
                 .positiveText("Скачать")
-                .neutralText("В избранное")
-                .negativeText("Отмена")
+                .neutralText(BackgroundLoader.loadedBooks.get(i).fave ? "Из избранного" : "В избранное")
                 .negativeColorAttr(Color.parseColor("#ffffff"))
                 .positiveColorRes(R.color.primaryColor)
                 .neutralColorAttr(Color.parseColor("#ffffff"))
@@ -301,10 +302,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     @Override
                     public void onNeutral(MaterialDialog dialog) {
                         super.onNeutral(dialog);
-                        BackgroundLoader.loadedBooks.get(index).fave = true;
-                        BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id);
-                        refresh();
-                        //fsdfs
+                        if (!BackgroundLoader.loadedBooks.get(index).fave) {
+                            BackgroundLoader.loadedBooks.get(index).fave = true;
+                            BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
+                            refresh();
+                        }
+                        else{
+                            BackgroundLoader.loadedBooks.get(index).fave = false;
+                            BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
+                            refresh();
+                        }
 
                     }
                 })
@@ -314,15 +321,15 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void setCatId(int id) {
         catId = id;
-        if (mContentAdapter != null && mode==Modes.FAVS) {
+        if (mContentAdapter != null && mode == Modes.FAVS) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingFavs(catId, 0, 10);
         }
-        if (mContentAdapter != null && mode==Modes.POPULAR_WEEK) {
+        if (mContentAdapter != null && mode == Modes.POPULAR_WEEK) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingPopularForWeek(catId, 0, 10);
         }
-        if (mContentAdapter != null && mode==Modes.POPULAR) {
+        if (mContentAdapter != null && mode == Modes.POPULAR) {
             mContentAdapter.clear();
             BackgroundLoader.startLoadingPopular(catId, 0, 10);
         }
@@ -382,9 +389,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             if (view.imageView != null)
                 view.imageView.setImageDrawable(drawable);
 
-            if (view.faveStar != null && item.fave){
+            if (view.faveStar != null && item.fave) {
                 view.faveStar.setVisibility(View.VISIBLE);
-                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);}
+                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);
+            }
             return rowView;
         }
 
@@ -489,17 +497,20 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 case 3:
                                     fragment = new SearchFragment();
                                     mode = Modes.FAVS;
-                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingFavs(1, 0, 10);
+                                    if (mContentAdapter != null && fragment != null)
+                                        BackgroundLoader.startLoadingFavs(1, 0, 10);
                                     break;
                                 case 6:
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR_WEEK;
-                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+                                    if (mContentAdapter != null && fragment != null)
+                                        BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
                                     break;
                                 case 7:
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR;
-                                    if (mContentAdapter!=null && fragment!=null) BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    if (mContentAdapter != null && fragment != null)
+                                        BackgroundLoader.startLoadingPopular(1, 0, 10);
                                 default:
                                     break;
 
@@ -513,7 +524,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                             setTitle(DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()));
 
-                             //
+                            //
                         }
                     }
                 })
@@ -553,7 +564,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     public void onAttachFragment(android.app.Fragment fragment) {
         super.onAttachFragment(fragment);
         if (mode == Modes.SEARCH)
-            ((TextView)findViewById(R.id.headerTitle)).setText("Выберите категорию и начните поиск");
+            ((TextView) findViewById(R.id.headerTitle)).setText("Выберите категорию и начните поиск");
     }
 
     @Override
