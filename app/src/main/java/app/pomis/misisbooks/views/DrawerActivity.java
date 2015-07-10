@@ -1,11 +1,15 @@
 package app.pomis.misisbooks.views;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -50,6 +54,7 @@ import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
+import app.pomis.misisbooks.bl.FileDownloader;
 import app.pomis.misisbooks.bl.SearchHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
@@ -60,12 +65,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Fragment fragment;
     ContentAdapter mContentAdapter;
     public int mode = 0; // 1 поиск
-
+    public int downloadMode = 1;
     class Modes {
         static public final int SEARCH = 1;
         static public final int POPULAR = 2;
         static public final int POPULAR_WEEK = 3;
         static public final int FAVS = 4;
+        static public final int DOWNLOADS = 5;
+    }
+    class Settings{
+        static public final int CUSTOM_DOWNLOAD = 1;
+        static public final int BROWSER_DOWNLOAD = 2;
     }
 
     private Toolbar toolbar;
@@ -306,13 +316,29 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             BackgroundLoader.loadedBooks.get(index).fave = true;
                             BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
                             refresh();
-                        }
-                        else{
+                        } else {
                             BackgroundLoader.loadedBooks.get(index).fave = false;
                             BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
                             refresh();
                         }
 
+                    }
+                })
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        super.onPositive(dialog);
+
+                        String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
+
+                        if (downloadMode==Settings.BROWSER_DOWNLOAD) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(Intent.createChooser(intent, "Выберите браузер"));
+                        }
+                        else if (downloadMode==Settings.CUSTOM_DOWNLOAD){
+                            new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index).downloadUrl,
+                                    BackgroundLoader.loadedBooks.get(index).name);
+                        }
                     }
                 })
                 .show();
@@ -511,6 +537,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     mode = Modes.POPULAR;
                                     if (mContentAdapter != null && fragment != null)
                                         BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    break;
+                                case 2:
+                                    fragment = new SearchFragment();
+                                    mode = Modes.DOWNLOADS;
+                                    //if (mContentAdapter != null && fragment != null)
+                                        //BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    break;
                                 default:
                                     break;
 
