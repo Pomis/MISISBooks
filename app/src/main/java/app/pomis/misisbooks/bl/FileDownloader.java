@@ -30,7 +30,7 @@ public class FileDownloader extends AsyncTask<String, String, String> {
     @Override
     protected String doInBackground(String... strings) {
         this.url = strings[0];
-        context = DrawerActivity.getInstance();//govno
+        context = DrawerActivity.getInstance();
         downloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
         Uri uri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(uri);
