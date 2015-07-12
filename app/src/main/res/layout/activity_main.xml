@@ -11,6 +11,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:text="TEST"
-        android:onClick="logIn"/>
+        android:onClick="logIn"
+        android:id="@+id/loginButton"/>
 
 </RelativeLayout>

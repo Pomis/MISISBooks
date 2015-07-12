@@ -1,15 +1,12 @@
 package app.pomis.misisbooks.views;
 
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -55,7 +52,7 @@ import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
 import app.pomis.misisbooks.bl.FileDownloader;
-import app.pomis.misisbooks.bl.SearchHistory;
+import app.pomis.misisbooks.bl.SearchAndLoadHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
 
@@ -66,6 +63,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     ContentAdapter mContentAdapter;
     public int mode = 0; // 1 поиск
     public int downloadMode = 1;
+
     class Modes {
         static public final int SEARCH = 1;
         static public final int POPULAR = 2;
@@ -73,7 +71,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         static public final int FAVS = 4;
         static public final int DOWNLOADS = 5;
     }
-    class Settings{
+
+    class Settings {
         static public final int CUSTOM_DOWNLOAD = 1;
         static public final int BROWSER_DOWNLOAD = 2;
     }
@@ -92,9 +91,12 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         BackgroundLoader.startLoadingCats();
 
 
+
         // Поиск
         search = (SearchBox) findViewById(R.id.searchbox);
         search.enableVoiceRecognition(this);
+
+        // Отрисовка тулбара
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         this.setSupportActionBar(toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -104,9 +106,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 return true;
             }
         });
+
+        createNavigationDrawer();
         search.bringToFront();
-        mSearchHistory = new SearchHistory(this);
-        mSearchHistory.loadAdd(search);
+        mSearchAndLoadHistory = new SearchAndLoadHistory(this);
+        mSearchAndLoadHistory.loadAdd(search);
         setTitle("");
     }
 
@@ -122,7 +126,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     //region Поиск
     private MenuItem mSearchAction;
-    SearchHistory mSearchHistory;
+    SearchAndLoadHistory mSearchAndLoadHistory;
     private boolean isSearchOpened = false;
     private EditText edtSeach;
     public int catId = 1;
@@ -133,10 +137,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
 
-    // Выдача результатов поиска
+    // Выдача результатов поиска (или загрузки)
     public void onSearchResultDownloaded() {
         if (mContentAdapter == null) {
-            mContentAdapter = new ContentAdapter(this, R.layout.book_layout, BackgroundLoader.loadedBooks);
+            mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
+                    (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
         }
         ListView lv = ((ListView) findViewById(R.id.search_result));
 //            lv.addHeaderView(view);
@@ -163,6 +168,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 break;
             case Modes.POPULAR:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за всё время");
+                break;
+            case Modes.DOWNLOADS:
+                ((TextView) findViewById(R.id.headerTitle)).setText("Загрузки");
                 break;
         }
         ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
@@ -262,7 +270,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 }
                 search.addSearchable(new SearchResult(search.getSearchText(), getResources().getDrawable(R.drawable.ic_history)));
                 ((ArrayAdapter) ((ListView) search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
-                mSearchHistory.saveAll(search);
+                mSearchAndLoadHistory.saveAll(search);
             }
 
             @Override
@@ -303,7 +311,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         new MaterialDialog.Builder(this)
                 .title(BackgroundLoader.loadedBooks.get(i).name)
                 .content(descr)
-                .positiveText("Скачать")
+                .positiveText(FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(i)) ? "Уже загружено" : "Скачать")
                 .neutralText(BackgroundLoader.loadedBooks.get(i).fave ? "Из избранного" : "В избранное")
                 .negativeColorAttr(Color.parseColor("#ffffff"))
                 .positiveColorRes(R.color.primaryColor)
@@ -328,16 +336,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     @Override
                     public void onPositive(MaterialDialog dialog) {
                         super.onPositive(dialog);
+                        // Если книга не скачана, то начинаем-с скачивать её
+                        if (!FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(index))) {
 
-                        String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
+                            String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
 
-                        if (downloadMode==Settings.BROWSER_DOWNLOAD) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            startActivity(Intent.createChooser(intent, "Выберите браузер"));
-                        }
-                        else if (downloadMode==Settings.CUSTOM_DOWNLOAD){
-                            new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index).downloadUrl,
-                                    BackgroundLoader.loadedBooks.get(index).name);
+                            if (downloadMode == Settings.BROWSER_DOWNLOAD) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(Intent.createChooser(intent, "Выберите браузер"));
+                            } else if (downloadMode == Settings.CUSTOM_DOWNLOAD) {
+                                new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index));
+                            }
                         }
                     }
                 })
@@ -449,17 +458,18 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     public void onCatsDownloaded() {
     }
 
-
     //
     // Navigation Drawer, фрагмент по умолчанию
     //
-    public void onResDownloaded() {
+    public void createNavigationDrawer() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View vi = inflater.inflate(R.layout.drawer_header, null); //log.xml is your file.
         ImageView imgg = (ImageView) vi.findViewById(R.id.header);
-        imgg.setImageBitmap(Account.photo);
-        ((TextView) vi.findViewById(R.id.headerText)).setText(Account.name);
+        if (Account.photo != null)
+            imgg.setImageBitmap(Account.photo);
+        if (Account.name != null)
+            ((TextView) vi.findViewById(R.id.headerText)).setText(Account.name);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -542,7 +552,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     fragment = new SearchFragment();
                                     mode = Modes.DOWNLOADS;
                                     //if (mContentAdapter != null && fragment != null)
-                                        //BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    //BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
                                 default:
                                     break;
@@ -574,23 +584,25 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mDrawer.build();
 
 
+
+
+
+    }
+
+    //
+    //  Обновление Navi Drawer
+    //
+    public void onResDownloaded() {
+        ((ImageView) findViewById(R.id.header)).setImageBitmap(Account.photo);
+        ((TextView) findViewById(R.id.headerText)).setText(Account.name);
+
         // Открыть фрагмент поиска по умолчанию
-
-
         fragment = new SearchFragment();
         mode = Modes.POPULAR_WEEK;
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment).commit();
         BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
-
-
-        //setTitle("Поиск");
-
-        //TextView tx = (TextView)vi.findViewById(R.id.headertext);
-        //tx.setText("fysdjkfhjsdhfsd");//(Account.name);
-
-
     }
 
     @Override

@@ -32,6 +32,11 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        try {
+            logIn(findViewById(R.id.loginButton));
+        } catch (Exception e){
+
+        }
     }
 
 

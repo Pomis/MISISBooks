@@ -17,11 +17,11 @@ import app.pomis.misisbooks.R;
 /**
  * Created by romanismagilov on 03.07.15.
  */
-public class SearchHistory {
+public class SearchAndLoadHistory {
 
     private SharedPreferences preferences;
     private Context context;
-    public SearchHistory(Context appContext) {
+    public SearchAndLoadHistory(Context appContext) {
         context = appContext;
         preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     }
@@ -43,6 +43,7 @@ public class SearchHistory {
 
     }
 
+    // сохранить поиски в шаредпрефс
     public void saveAll(SearchBox search){
         ArrayList<SearchResult> results = search.getSearchables();
         ArrayList<String> stringList = new ArrayList<>();
@@ -50,4 +51,9 @@ public class SearchHistory {
             stringList.add(result.title);
         putListString("keys", stringList);
     }
+
+    // сохранить список загрузок
+    public void saveDownloadList(){
+    }
+
 }
