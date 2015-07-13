@@ -16,11 +16,18 @@ public class Book {
     public Category category;
     public int countDl;
     public boolean fave;
+    public String fileName;
+    public String authorsString="";
     public String getAuthorsToString(){
-        String str = "";
-        for (int i = 0; i < authors.size(); i++){
-            str += (i>0)?", "+authors.get(i):authors.get(i);
+        if (authorsString!="") {
+            String str = "";
+            for (int i = 0; i < authors.size(); i++) {
+                str += (i > 0) ? ", " + authors.get(i) : authors.get(i);
+            }
+            authorsString = str;
+            return str;
         }
-        return str;
+        else
+            return authorsString;
     }
 }

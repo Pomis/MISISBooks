@@ -14,6 +14,9 @@ public class Category {
         categoryName = category_name;
         colorHex = color_hex;
     }
+    public Category(String category_name){
+        categoryName = category_name;
+    }
 
     static public ArrayList<Category> arrayList = new ArrayList<>();
 

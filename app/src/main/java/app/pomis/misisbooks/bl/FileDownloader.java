@@ -77,16 +77,19 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
             }
         };
 
+        ///
+        /// Книга загружена
+        ///
         final IntentFilter intef = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         receiverDownloadComplete = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long ref = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                if (myDownloadReference == ref) {
-                    //jjkkjk
+                //if (myDownloadReference == ref) {
+                    downloadingBookFinal.fileName = fullFilename;
                     downloadedBooks.add(downloadingBookFinal);
-                }
-                //DrawerActivity.getInstance().setContentView(android.support.design.R.layout.abc_dialog_title_material);
+                    SearchAndLoadHistory.getInstance().saveDownloadList();
+                //}
             }
         };
 

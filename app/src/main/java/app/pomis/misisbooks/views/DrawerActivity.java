@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -42,6 +43,7 @@ import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.quinny898.library.persistentsearch.SearchBox;
 import com.quinny898.library.persistentsearch.SearchResult;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -91,7 +93,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         BackgroundLoader.startLoadingCats();
 
 
-
         // Поиск
         search = (SearchBox) findViewById(R.id.searchbox);
         search.enableVoiceRecognition(this);
@@ -107,12 +108,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             }
         });
 
+        // Подрузка загруженных файлов
+
+
         createNavigationDrawer();
         search.bringToFront();
         mSearchAndLoadHistory = new SearchAndLoadHistory(this);
         mSearchAndLoadHistory.loadAdd(search);
+        mSearchAndLoadHistory.loadDownloadList();
         setTitle("");
     }
+
 
     // Кнопка назад
     @Override
@@ -177,6 +183,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     }
 
+    // Список загрузок
+    public void showDownloadsList() {
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, FileDownloader.downloadedBooks);
+        ListView lv = ((ListView) findViewById(R.id.search_result));
+        lv.setAdapter(mContentAdapter);
+        lv.setOnItemClickListener(this);
+        mContentAdapter.notifyDataSetChanged();
+        setListViewHeightBasedOnChildren(lv);
+        ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
+    }
 
     // Обновление содержимого
     public void refresh() {
@@ -308,50 +324,89 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 "\nКатегория: " + BackgroundLoader.loadedBooks.get(i).category.categoryName +
                 "\nРазмер: " + BackgroundLoader.loadedBooks.get(i).size +
                 "\nСкачано " + BackgroundLoader.loadedBooks.get(i).countDl + " раз.";
-        new MaterialDialog.Builder(this)
-                .title(BackgroundLoader.loadedBooks.get(i).name)
-                .content(descr)
-                .positiveText(FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(i)) ? "Уже загружено" : "Скачать")
-                .neutralText(BackgroundLoader.loadedBooks.get(i).fave ? "Из избранного" : "В избранное")
-                .negativeColorAttr(Color.parseColor("#ffffff"))
-                .positiveColorRes(R.color.primaryColor)
-                .neutralColorAttr(Color.parseColor("#ffffff"))
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onNeutral(MaterialDialog dialog) {
-                        super.onNeutral(dialog);
-                        if (!BackgroundLoader.loadedBooks.get(index).fave) {
-                            BackgroundLoader.loadedBooks.get(index).fave = true;
-                            BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
-                            refresh();
-                        } else {
-                            BackgroundLoader.loadedBooks.get(index).fave = false;
-                            BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
-                            refresh();
-                        }
+        switch (mode) {
+            case Modes.DOWNLOADS:
+                new MaterialDialog.Builder(this)
+                        .title(BackgroundLoader.loadedBooks.get(i).name)
+                        .content(descr)
+                        .positiveText("Открыть")
+                        .neutralText("Удалить")
+                        .negativeColorAttr(Color.parseColor("#ffffff"))
+                        .positiveColorRes(R.color.primaryColor)
+                        .neutralColorAttr(Color.parseColor("#ffffff"))
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            ///
+                            /// Удаление файла
+                            ///
+                            public void onNeutral(MaterialDialog dialog) {
+                                super.onNeutral(dialog);
 
-                    }
-                })
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        super.onPositive(dialog);
-                        // Если книга не скачана, то начинаем-с скачивать её
-                        if (!FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(index))) {
 
-                            String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
-
-                            if (downloadMode == Settings.BROWSER_DOWNLOAD) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                                startActivity(Intent.createChooser(intent, "Выберите браузер"));
-                            } else if (downloadMode == Settings.CUSTOM_DOWNLOAD) {
-                                new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index));
                             }
-                        }
-                    }
-                })
-                .show();
-        //refresh();
+                        })
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            ///
+                            /// Открытие скачанного файла
+                            ///
+                            public void onPositive(MaterialDialog dialog) {
+                                super.onPositive(dialog);
+                                File selectedFile = new File(Environment.DIRECTORY_DOWNLOADS, FileDownloader.downloadedBooks.get(index).fileName);
+                                Intent intent = new Intent();
+                                intent.setAction(Intent.ACTION_VIEW);
+                                intent.setDataAndType(Uri.fromFile(selectedFile), "application/pdf");
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+                break;
+            default:
+                new MaterialDialog.Builder(this)
+                        .title(BackgroundLoader.loadedBooks.get(i).name)
+                        .content(descr)
+                        .positiveText(FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(i)) ? "Уже загружено" : "Скачать")
+                        .neutralText(BackgroundLoader.loadedBooks.get(i).fave ? "Из избранного" : "В избранное")
+                        .negativeColorAttr(Color.parseColor("#ffffff"))
+                        .positiveColorRes(R.color.primaryColor)
+                        .neutralColorAttr(Color.parseColor("#ffffff"))
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onNeutral(MaterialDialog dialog) {
+                                super.onNeutral(dialog);
+                                if (!BackgroundLoader.loadedBooks.get(index).fave) {
+                                    BackgroundLoader.loadedBooks.get(index).fave = true;
+                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
+                                    refresh();
+                                } else {
+                                    BackgroundLoader.loadedBooks.get(index).fave = false;
+                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
+                                    refresh();
+                                }
+
+                            }
+                        })
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onPositive(MaterialDialog dialog) {
+                                super.onPositive(dialog);
+                                // Если книга не скачана, то начинаем-с скачивать её
+                                if (!FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(index))) {
+
+                                    String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
+
+                                    if (downloadMode == Settings.BROWSER_DOWNLOAD) {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                        startActivity(Intent.createChooser(intent, "Выберите браузер"));
+                                    } else if (downloadMode == Settings.CUSTOM_DOWNLOAD) {
+                                        new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index));
+                                    }
+                                }
+                            }
+                        })
+                        .show();
+                break;
+        }
     }
 
     public void setCatId(int id) {
@@ -368,9 +423,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             mContentAdapter.clear();
             BackgroundLoader.startLoadingPopular(catId, 0, 10);
         }
-//        if (mode == 3){
-//            if (mContentAdapter!=null)
-//        }
     }
 
 
@@ -390,45 +442,79 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View rowView = convertView;
-            ViewHolder view;
+            // Загрузка
+            if (mode == Modes.DOWNLOADS) {
+                View rowView = convertView;
+                ViewHolder view;
 
-            if (rowView == null) {
-                // Get a new instance of the row layout view
-                LayoutInflater inflater = activity.getLayoutInflater();
-                rowView = inflater.inflate(R.layout.book_layout, null);
+                if (rowView == null) {
+                    // Get a new instance of the row layout view
+                    LayoutInflater inflater = activity.getLayoutInflater();
+                    rowView = inflater.inflate(R.layout.book_layout, null);
 
-                // Hold the view objects in an object, that way the don't need to be "re-  finded"
-                view = new ViewHolder();
-                view.textView = (TextView) rowView.findViewById(R.id.title);
-                view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
-                view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
-                view.faveStar = (ImageView) rowView.findViewById(R.id.faveStar);
-                rowView.setTag(view);
+                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
+                    view = new ViewHolder();
+                    view.textView = (TextView) rowView.findViewById(R.id.title);
+                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
+                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
+                    rowView.setTag(view);
 
-            } else {
-                view = (ViewHolder) rowView.getTag();
+                } else {
+                    view = (ViewHolder) rowView.getTag();
+                }
+                Book item = FileDownloader.downloadedBooks.get(position);
+                view.textView.setText(item.name);
+
+                view.authorsTextView.setText(item.getAuthorsToString());
+                if (view.sizeView != null)
+                    view.sizeView.setText("Размер: " + item.size);
+                // Иконка загрузки
+                if (view.imageView != null)
+                    view.imageView.setImageResource(R.drawable.ic_file_download_black_24dp);
+                return rowView;
             }
+            // Из поиска
+            else {
+                View rowView = convertView;
+                ViewHolder view;
+
+                if (rowView == null) {
+                    // Get a new instance of the row layout view
+                    LayoutInflater inflater = activity.getLayoutInflater();
+                    rowView = inflater.inflate(R.layout.book_layout, null);
+
+                    // Hold the view objects in an object, that way the don't need to be "re-  finded"
+                    view = new ViewHolder();
+                    view.textView = (TextView) rowView.findViewById(R.id.title);
+                    view.imageView = (ImageView) rowView.findViewById(R.id.imageView);
+                    view.authorsTextView = (TextView) rowView.findViewById(R.id.subText);
+                    view.faveStar = (ImageView) rowView.findViewById(R.id.faveStar);
+                    rowView.setTag(view);
+
+                } else {
+                    view = (ViewHolder) rowView.getTag();
+                }
 
 
-            /** Set data to your Views. */
-            Book item = BackgroundLoader.loadedBooks.get(position);
-            view.textView.setText(item.name);
+                /** Set data to your Views. */
+                Book item = BackgroundLoader.loadedBooks.get(position);
+                view.textView.setText(item.name);
 
-            view.authorsTextView.setText(item.getAuthorsToString());
-            if (view.sizeView != null)
-                view.sizeView.setText("Размер: " + item.size);
-            // Круголь цветной
-            Drawable drawable = getResources().getDrawable(R.drawable.circle);
-            drawable.setColorFilter(Color.parseColor("#" + item.category.colorHex), PorterDuff.Mode.SRC_ATOP);
-            if (view.imageView != null)
-                view.imageView.setImageDrawable(drawable);
+                view.authorsTextView.setText(item.getAuthorsToString());
+                if (view.sizeView != null)
+                    view.sizeView.setText("Размер: " + item.size);
+                // Круголь цветной
+                Drawable drawable = getResources().getDrawable(R.drawable.circle);
+                drawable.setColorFilter(Color.parseColor("#" + item.category.colorHex), PorterDuff.Mode.SRC_ATOP);
+                if (view.imageView != null)
+                    view.imageView.setImageDrawable(drawable);
 
-            if (view.faveStar != null && item.fave) {
-                view.faveStar.setVisibility(View.VISIBLE);
-                view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);
+                if (view.faveStar != null && item.fave) {
+                    view.faveStar.setVisibility(View.VISIBLE);
+                    view.faveStar.setImageResource(R.drawable.ic_star_border_black_24dp);
+                }
+                return rowView;
             }
-            return rowView;
         }
 
         protected class ViewHolder {
@@ -551,6 +637,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 case 2:
                                     fragment = new SearchFragment();
                                     mode = Modes.DOWNLOADS;
+                                    showDownloadsList();
                                     //if (mContentAdapter != null && fragment != null)
                                     //BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
@@ -582,9 +669,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     }
                 });
         mDrawer.build();
-
-
-
 
 
     }
