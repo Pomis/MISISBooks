@@ -19,7 +19,7 @@ public class Book {
     public String fileName;
     public String authorsString="";
     public String getAuthorsToString(){
-        if (authorsString!="") {
+        if (authorsString.equals("")) {
             String str = "";
             for (int i = 0; i < authors.size(); i++) {
                 str += (i > 0) ? ", " + authors.get(i) : authors.get(i);

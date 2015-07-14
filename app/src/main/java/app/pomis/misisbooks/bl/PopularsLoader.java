@@ -61,7 +61,6 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
     }
 
     void parseStuff(String result) {
-        BackgroundLoader.loadedBooks.clear();
         try {
             JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
             JSONArray jArray = jObject.getJSONObject("response").getJSONArray("items");

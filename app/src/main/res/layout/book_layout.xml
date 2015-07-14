@@ -17,12 +17,16 @@
     >
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:id="@+id/imageView"
         android:src="@drawable/abc_btn_radio_material"
+        android:height="40dp"
         android:minHeight="40dp"
+        android:maxHeight="40dp"
+        android:width="40dp"
         android:minWidth="40dp"
+        android:maxWidth="40dp"
         android:layout_margin="16dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"/>

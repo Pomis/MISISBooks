@@ -2,6 +2,7 @@ package app.pomis.misisbooks.bl;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -78,13 +79,19 @@ public class SearchAndLoadHistory {
         ArrayList<String> filenames = new ArrayList<String>(Arrays.asList(TextUtils.split(preferences.getString("filenames", ""), "‚‗‚")));
         ArrayList<String> sizes = new ArrayList<String>(Arrays.asList(TextUtils.split(preferences.getString("sizes", ""), "‚‗‚")));
         for (int i = 0; i < names.size(); i++) {
-            File file = new File(Environment.DIRECTORY_DOWNLOADS, filenames.get(i));
+            File file=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filenames.get(i));
+
+            //dir.mkdirs();
+
+           // Uri downloadLocation=Uri.fromFile(new File(dir, filenames.get(i)));
+           // File file = new File(String.valueOf(downloadLocation));
             if (file.exists()) {
                 Book book = new Book();
                 book.authorsString = authors.get(i);
                 book.category = new Category(categories.get(i));
                 book.fileName = filenames.get(i);
                 book.name = names.get(i);
+                book.size = sizes.get(i);
                 FileDownloader.downloadedBooks.add(book);
             }
         }

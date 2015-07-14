@@ -65,6 +65,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     ContentAdapter mContentAdapter;
     public int mode = 0; // 1 поиск
     public int downloadMode = 1;
+    public boolean isContinuingLoading = false;
 
     class Modes {
         static public final int SEARCH = 1;
@@ -134,7 +135,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     private MenuItem mSearchAction;
     SearchAndLoadHistory mSearchAndLoadHistory;
     private boolean isSearchOpened = false;
-    private EditText edtSeach;
     public int catId = 1;
 
 
@@ -179,7 +179,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((TextView) findViewById(R.id.headerTitle)).setText("Загрузки");
                 break;
         }
-        ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
+        if (!isContinuingLoading)
+            ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
+        else
+            ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
 
     }
 
@@ -202,6 +205,22 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         lv.setAdapter(mContentAdapter);
         lv.setOnItemClickListener(this);
         mContentAdapter.notifyDataSetChanged();
+    }
+
+
+    public void loadMore(View view) {
+        isContinuingLoading = true;
+        switch (mode) {
+            case Modes.POPULAR:
+                BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
+            case Modes.FAVS:
+                BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
+            case Modes.POPULAR_WEEK:
+                BackgroundLoader.continueLoadingPopularForWeek(catId, BackgroundLoader.loadedBooks.size(), 10);
+            case Modes.SEARCH:
+                BackgroundLoader.continueLoadingSearchResults(search.getSearchText(), 10, BackgroundLoader.loadedBooks.size(), catId);
+        }
+        //((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) {
@@ -352,10 +371,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             ///
                             public void onPositive(MaterialDialog dialog) {
                                 super.onPositive(dialog);
-                                File selectedFile = new File(Environment.DIRECTORY_DOWNLOADS, FileDownloader.downloadedBooks.get(index).fileName);
+                                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                        FileDownloader.downloadedBooks.get(index).fileName);
                                 Intent intent = new Intent();
                                 intent.setAction(Intent.ACTION_VIEW);
-                                intent.setDataAndType(Uri.fromFile(selectedFile), "application/pdf");
+                                intent.setDataAndType(Uri.fromFile(file), "application/pdf");
                                 startActivity(intent);
                             }
                         })
@@ -372,22 +392,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         .neutralColorAttr(Color.parseColor("#ffffff"))
                         .callback(new MaterialDialog.ButtonCallback() {
                             @Override
-                            public void onNeutral(MaterialDialog dialog) {
-                                super.onNeutral(dialog);
-                                if (!BackgroundLoader.loadedBooks.get(index).fave) {
-                                    BackgroundLoader.loadedBooks.get(index).fave = true;
-                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
-                                    refresh();
-                                } else {
-                                    BackgroundLoader.loadedBooks.get(index).fave = false;
-                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
-                                    refresh();
-                                }
-
-                            }
-                        })
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
                             public void onPositive(MaterialDialog dialog) {
                                 super.onPositive(dialog);
                                 // Если книга не скачана, то начинаем-с скачивать её
@@ -402,6 +406,22 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                         new FileDownloader().execute(BackgroundLoader.loadedBooks.get(index));
                                     }
                                 }
+                            }
+                        })
+                        .callback(new MaterialDialog.ButtonCallback() {
+                            @Override
+                            public void onNeutral(MaterialDialog dialog) {
+                                super.onNeutral(dialog);
+                                if (!BackgroundLoader.loadedBooks.get(index).fave) {
+                                    BackgroundLoader.loadedBooks.get(index).fave = true;
+                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
+                                    refresh();
+                                } else {
+                                    BackgroundLoader.loadedBooks.get(index).fave = false;
+                                    BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, true);
+                                    refresh();
+                                }
+
                             }
                         })
                         .show();
@@ -469,8 +489,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 if (view.sizeView != null)
                     view.sizeView.setText("Размер: " + item.size);
                 // Иконка загрузки
-                if (view.imageView != null)
-                    view.imageView.setImageResource(R.drawable.ic_file_download_black_24dp);
+                if (view.imageView != null) {
+                    view.imageView.setImageResource(R.drawable.pdf);
+
+                }
                 return rowView;
             }
             // Из поиска
@@ -586,6 +608,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                     @Override
                     public void onDrawerClosed(View drawerView) {
+                        if (mode == Modes.DOWNLOADS)
+                            showDownloadsList();
+                        if (((ScrollView) findViewById(R.id.scrollViewId))!=null)
+                            ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
                     }
                 })
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -637,7 +663,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 case 2:
                                     fragment = new SearchFragment();
                                     mode = Modes.DOWNLOADS;
-                                    showDownloadsList();
+
                                     //if (mContentAdapter != null && fragment != null)
                                     //BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
@@ -653,6 +679,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             // Highlight the selected item, update the title, and close the drawer
 
                             setTitle(DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()));
+
 
                             //
                         }

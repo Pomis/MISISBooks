@@ -63,7 +63,7 @@ public class FaveAdder extends AsyncTask<String, String, String> {
     }
 
     void parseStuff(String result) {
-        success = "Не удалось добавить книгу в избанное";
+        success = "Книга удалена из избранного";
         try {
             JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
             JSONObject jOb = jObject.getJSONObject("response");
@@ -75,8 +75,6 @@ public class FaveAdder extends AsyncTask<String, String, String> {
                     int id = Integer.parseInt(temp.get(j).toString());
                     success = "Книга успешно добавлена в избранное";
                 }
-                if (temp.length()==0)
-                    success = "Книга уже в избранном";
             }
             //String tokenString = jObject.getJSONObject("response").getString("access_token");
 

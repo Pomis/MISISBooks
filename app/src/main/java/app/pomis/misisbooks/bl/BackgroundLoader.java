@@ -2,6 +2,8 @@ package app.pomis.misisbooks.bl;
 
 import java.util.ArrayList;
 
+import app.pomis.misisbooks.views.DrawerActivity;
+
 /**
  * Created by romanismagilov on 30.06.15.
  */
@@ -15,19 +17,53 @@ public class BackgroundLoader {
     static public ArrayList<Book> loadedBooks = new ArrayList<>();
 
     static public void startLoadingPopular(int id, int offset, int count) {
+        DrawerActivity.getInstance().isContinuingLoading = false;
+        BackgroundLoader.loadedBooks.clear();
         new PopularsLoader().execute("http://twosphere.ru/api/materials.getPopular?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
                 "&access_token=" + Account.getInstance().twosphere_token);
     }
 
     static public void startLoadingPopularForWeek(int id, int offset, int count) {
+        DrawerActivity.getInstance().isContinuingLoading = false;
+        BackgroundLoader.loadedBooks.clear();
         new PopularsLoader().execute("http://twosphere.ru/api/materials.getPopularForWeek?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
                 "&access_token=" + Account.getInstance().twosphere_token);
     }
 
     static public void startLoadingSearchResults(String q, int count, int offset, int category) {
+        DrawerActivity.getInstance().isContinuingLoading = false;
+        BackgroundLoader.loadedBooks.clear();
         new PopularsLoader().execute("http://twosphere.ru/api/materials.search?count=" + count + "&q=" + q + "&offset=" + offset + "&category=" + category + "&fields=all" +
                 "&access_token=" + Account.getInstance().twosphere_token);
 
+    }
+
+    static public void startLoadingFavs(int id, int offset, int count) {
+        DrawerActivity.getInstance().isContinuingLoading = false;
+        BackgroundLoader.loadedBooks.clear();
+        new PopularsLoader().execute("http://twosphere.ru/api/fave.getDocuments?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
+                "&access_token=" + Account.getInstance().twosphere_token);
+    }
+
+    static public void continueLoadingPopular(int id, int offset, int count) {
+        new PopularsLoader().execute("http://twosphere.ru/api/materials.getPopular?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
+                "&access_token=" + Account.getInstance().twosphere_token);
+    }
+
+    static public void continueLoadingPopularForWeek(int id, int offset, int count) {
+        new PopularsLoader().execute("http://twosphere.ru/api/materials.getPopularForWeek?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
+                "&access_token=" + Account.getInstance().twosphere_token);
+    }
+
+    static public void continueLoadingSearchResults(String q, int count, int offset, int category) {
+        new PopularsLoader().execute("http://twosphere.ru/api/materials.search?count=" + count + "&q=" + q + "&offset=" + offset + "&category=" + category + "&fields=all" +
+                "&access_token=" + Account.getInstance().twosphere_token);
+
+    }
+
+    static public void continueLoadingFavs(int id, int offset, int count) {
+        new PopularsLoader().execute("http://twosphere.ru/api/fave.getDocuments?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
+                "&access_token=" + Account.getInstance().twosphere_token);
     }
 
     static public void addOrRemoveFromFavs(int i, boolean fave) {
@@ -36,11 +72,6 @@ public class BackgroundLoader {
             new FaveAdder().execute("http://twosphere.ru/api/fave.addDocument?edition_id=" + i + "&access_token=" + Account.getInstance().twosphere_token);
         else
             new FaveAdder().execute("http://twosphere.ru/api/fave.deleteDocument?edition_id=" + i + "&access_token=" + Account.getInstance().twosphere_token);
-    }
-
-    static public void startLoadingFavs(int id, int offset, int count) {
-        new PopularsLoader().execute("http://twosphere.ru/api/fave.getDocuments?count=" + count + "&offset=" + offset + "&category=" + id + "&fields=all" +
-                "&access_token=" + Account.getInstance().twosphere_token);
     }
 
     static public Book getBookByServerId(int i) {
