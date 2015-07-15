@@ -66,6 +66,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     Drawer mDrawer;
     Fragment fragment;
     ContentAdapter mContentAdapter;
+    MaterialDialog mMaterialDialog;
     public int mode = 0; // 1 поиск
     public int downloadMode = 1;
     public boolean isContinuingLoading = false;
@@ -148,10 +149,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     // Выдача результатов поиска (или загрузки)
     public void onSearchResultDownloaded() {
-        if (mContentAdapter == null) {
             mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
                     (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
-        }
+
         ListView lv = ((ListView) findViewById(R.id.search_result));
 //            lv.addHeaderView(view);
 //            ((TextView)lv.findViewById(R.id.headerTitle)).setText("Результаты поиска");
@@ -184,8 +184,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
         if (!isContinuingLoading) {
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-        } else
+        } else{
+            mMaterialDialog.hide();
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
+        }
 
     }
 
@@ -217,12 +219,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             case Modes.POPULAR:
                 BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
             case Modes.FAVS:
-                BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
+                BackgroundLoader.continueLoadingFavs(catId, BackgroundLoader.loadedBooks.size(), 10);
             case Modes.POPULAR_WEEK:
                 BackgroundLoader.continueLoadingPopularForWeek(catId, BackgroundLoader.loadedBooks.size(), 10);
             case Modes.SEARCH:
                 BackgroundLoader.continueLoadingSearchResults(search.getSearchText(), 10, BackgroundLoader.loadedBooks.size(), catId);
         }
+        mMaterialDialog=new MaterialDialog.Builder(this)
+                .title("Загрузка...")
+                .content("Подождите")
+                .progress(true, 0)
+                .show();
         //((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
     }
 
@@ -260,7 +267,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     // Гмейловый поиск
     //
     public void openSearch() {
-        setTitle("");
+        //setTitle("");
+        setToolbarTitle();
         search.setLogoText("");
         isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);

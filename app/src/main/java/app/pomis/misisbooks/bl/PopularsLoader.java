@@ -68,7 +68,7 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
                 try {
                 JSONObject tempObj = jArray.getJSONObject(i);
                 Book book = new Book();
-                BackgroundLoader.loadedBooks.add(book);
+
                 book.id = tempObj.getInt("id");
                 book.name = tempObj.getString("name");
                 book.downloadUrl = tempObj.getString("download_url");
@@ -83,6 +83,7 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
                 book.category = Category.getCategoryById(tempObj.getJSONObject("category").getInt("id"));
                 book.countDl = tempObj.getInt("count_dl");
                 book.fave = tempObj.getBoolean("fave");
+                    BackgroundLoader.addBook(book);
                 }
                 catch (JSONException e){e.printStackTrace();}
 
