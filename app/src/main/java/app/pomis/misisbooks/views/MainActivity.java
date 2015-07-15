@@ -100,7 +100,6 @@ public class MainActivity extends ActionBarActivity {
                     api = new Api(account.access_token, API_ID);
                     Toast.makeText(this, account.access_token, Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, DrawerActivity.class));
-
                 }
                 break;
             default:

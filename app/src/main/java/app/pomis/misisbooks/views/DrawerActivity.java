@@ -1,6 +1,7 @@
 package app.pomis.misisbooks.views;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -117,7 +120,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mSearchAndLoadHistory = new SearchAndLoadHistory(this);
         mSearchAndLoadHistory.loadAdd(search);
         mSearchAndLoadHistory.loadDownloadList();
-        setTitle("");
+        setToolbarTitle();
     }
 
 
@@ -179,9 +182,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((TextView) findViewById(R.id.headerTitle)).setText("Загрузки");
                 break;
         }
-        if (!isContinuingLoading)
-            ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);//fullScroll(ScrollView.FOCUS_UP);
-        else
+        if (!isContinuingLoading) {
+            ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
+        } else
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
 
     }
@@ -257,7 +260,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     // Гмейловый поиск
     //
     public void openSearch() {
-        toolbar.setTitle("");
+        setTitle("");
         search.setLogoText("");
         isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);
@@ -278,13 +281,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             @Override
             public void onSearchOpened() {
                 // Use this to tint the screen
-
+                mSearchAction.setEnabled(false);
             }
 
             @Override
             public void onSearchClosed() {
                 // Use this to un-tint the screen
                 closeSearch();
+                mSearchAction.setEnabled(true);
             }
 
             @Override
@@ -329,7 +333,15 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     protected void closeSearch() {
         search.hideCircularly(this);
-        if (search.getSearchText().isEmpty()) toolbar.setTitle("");
+        if (search.getSearchText().isEmpty()) setToolbarTitle();
+    }
+
+    public void setToolbarTitle() {
+        if (mode == Modes.DOWNLOADS) {
+            toolbar.setTitle("MISIS Books");
+            setTitle("MISIS Books");
+        } else
+            toolbar.setTitle("");
     }
 
     //
@@ -349,7 +361,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         .title(BackgroundLoader.loadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
-                        .neutralText("Удалить")
+                        .negativeText("Удалить")
                         .negativeColorAttr(Color.parseColor("#ffffff"))
                         .positiveColorRes(R.color.primaryColor)
                         .neutralColorAttr(Color.parseColor("#ffffff"))
@@ -359,7 +371,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             /// Удаление файла
                             ///
                             public void onNeutral(MaterialDialog dialog) {
-                                super.onNeutral(dialog);
+                                super.onNegative(dialog);
 
 
                             }
@@ -373,13 +385,23 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 super.onPositive(dialog);
                                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                                         FileDownloader.downloadedBooks.get(index).fileName);
-                                Intent intent = new Intent();
-                                intent.setAction(Intent.ACTION_VIEW);
-                                intent.setDataAndType(Uri.fromFile(file), "application/pdf");
-                                startActivity(intent);
+                                if (file.exists()) {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Intent.ACTION_VIEW);
+                                    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(".pdf");
+                                    intent.setDataAndType(Uri.fromFile(file), "application/pdf");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    try {
+                                        startActivity(intent);
+                                        //finish();
+                                    } catch (ActivityNotFoundException e) {
+                                        Toast.makeText(DrawerActivity.getInstance(), "Нечем открывать файл этого типа", Toast.LENGTH_LONG).show();
+                                    }
+                                }
                             }
                         })
                         .show();
+
                 break;
             default:
                 new MaterialDialog.Builder(this)
@@ -407,8 +429,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     }
                                 }
                             }
-                        })
-                        .callback(new MaterialDialog.ButtonCallback() {
                             @Override
                             public void onNeutral(MaterialDialog dialog) {
                                 super.onNeutral(dialog);
@@ -587,8 +607,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 .withActionBarDrawerToggle(true)
                 .withHeader(vi)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(6),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(7),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(6),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
@@ -608,10 +628,12 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                     @Override
                     public void onDrawerClosed(View drawerView) {
-                        if (mode == Modes.DOWNLOADS)
+                        if (mode == Modes.DOWNLOADS) {
                             showDownloadsList();
-                        if (((ScrollView) findViewById(R.id.scrollViewId))!=null)
-                            ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
+                        }
+
+                        //if (((ScrollView) findViewById(R.id.scrollViewId))!=null)
+                        //    ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
                     }
                 })
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -678,10 +700,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                             // Highlight the selected item, update the title, and close the drawer
 
-                            setTitle(DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()));
+                            //setTitle(DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()));
 
 
                             //
+                        }
+                        if (mode == Modes.DOWNLOADS) {
+                            ((Spinner) findViewById(R.id.spinnerToolbar)).setVisibility(View.INVISIBLE);
+                            setToolbarTitle();
+                        } else {
+                            ((Spinner) findViewById(R.id.spinnerToolbar)).setVisibility(View.VISIBLE);
                         }
                     }
                 })
