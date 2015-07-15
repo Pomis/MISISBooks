@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
@@ -27,8 +28,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -91,6 +94,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
+
+
         String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token;
         singleton = this;
         // Подключение к АПИ книжечек
@@ -113,6 +118,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             }
         });
 
+        // спрятать подложку статусбара для лоллипопа, если запущено на старом ведре
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            findViewById(R.id.statusBarLollipop).setVisibility(View.INVISIBLE);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)toolbar.getLayoutParams();
+            params.setMargins(0,0,0,0);
+            toolbar.setLayoutParams(params);
+            params = (RelativeLayout.LayoutParams)search.getLayoutParams();
+            params.setMargins(-6,-4,-6,0);
+            search.setLayoutParams(params);
+        }
         // Подрузка загруженных файлов
 
 
@@ -149,8 +164,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     // Выдача результатов поиска (или загрузки)
     public void onSearchResultDownloaded() {
-            mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
-                    (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
+                (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
 
         ListView lv = ((ListView) findViewById(R.id.search_result));
 //            lv.addHeaderView(view);
@@ -184,7 +199,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
         if (!isContinuingLoading) {
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
-        } else{
+        } else {
             mMaterialDialog.hide();
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
         }
@@ -225,7 +240,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             case Modes.SEARCH:
                 BackgroundLoader.continueLoadingSearchResults(search.getSearchText(), 10, BackgroundLoader.loadedBooks.size(), catId);
         }
-        mMaterialDialog=new MaterialDialog.Builder(this)
+        mMaterialDialog = new MaterialDialog.Builder(this)
                 .title("Загрузка...")
                 .content("Подождите")
                 .progress(true, 0)
@@ -437,6 +452,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     }
                                 }
                             }
+
                             @Override
                             public void onNeutral(MaterialDialog dialog) {
                                 super.onNeutral(dialog);
