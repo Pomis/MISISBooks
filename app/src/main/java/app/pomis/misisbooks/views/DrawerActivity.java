@@ -233,12 +233,16 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         switch (mode) {
             case Modes.POPULAR:
                 BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
+                break;
             case Modes.FAVS:
                 BackgroundLoader.continueLoadingFavs(catId, BackgroundLoader.loadedBooks.size(), 10);
+                break;
             case Modes.POPULAR_WEEK:
                 BackgroundLoader.continueLoadingPopularForWeek(catId, BackgroundLoader.loadedBooks.size(), 10);
+                break;
             case Modes.SEARCH:
                 BackgroundLoader.continueLoadingSearchResults(search.getSearchText(), 10, BackgroundLoader.loadedBooks.size(), catId);
+                break;
         }
         mMaterialDialog = new MaterialDialog.Builder(this)
                 .title("Загрузка...")
@@ -635,11 +639,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
-                        new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName(R.string.drawer_item_help).withIcon(getResources().getDrawable(R.drawable.ic_settings_black_24dp)).withIdentifier(4),
-                        new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
-                        new DividerDrawerItem()
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3)
+                        //new DividerDrawerItem(),
+                        //new SecondaryDrawerItem().withName(R.string.drawer_item_help).withIcon(getResources().getDrawable(R.drawable.ic_settings_black_24dp)).withIdentifier(4),
+                        //new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
+                        //new DividerDrawerItem()
                         //,                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(FontAwesome.Icon.faw_github).withBadge("12+").withIdentifier(1)
                 )
                 .withOnDrawerListener(new Drawer.OnDrawerListener() {
@@ -755,6 +759,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     //  Обновление Navi Drawer
     //
+    boolean loaded = false;
     public void onResDownloaded() {
         ((ImageView) findViewById(R.id.header)).setImageBitmap(Account.photo);
         ((TextView) findViewById(R.id.headerText)).setText(Account.name);
@@ -765,7 +770,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment).commit();
-        BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+        if (!loaded) {
+            BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+        }
+        loaded = true;
     }
 
     @Override

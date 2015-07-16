@@ -17,17 +17,8 @@ public class BackgroundLoader {
 
     static public ArrayList<Book> loadedBooks = new ArrayList<>();
 
-    // Костыль, чтобы не добавлялись повторные книги. Я не знаю, почему они иногда лезут!
     static public void addBook(Book book){
-        boolean contained = false;
-        for (Book selectedBook: loadedBooks){
-            if (selectedBook.id==book.id) {
-                contained = true;
-                break;
-            }
-        }
-        if (!contained)
-            loadedBooks.add(book);
+        loadedBooks.add(book);
     }
 
     static public void startLoadingPopular(int id, int offset, int count) {
