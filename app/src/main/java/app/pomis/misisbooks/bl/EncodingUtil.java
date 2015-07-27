@@ -40,6 +40,7 @@ public class EncodingUtil
             result = s;
         }
 
+        result = result.trim();
         return result;
     }
 

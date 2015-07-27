@@ -25,6 +25,7 @@ import app.pomis.misisbooks.views.DrawerActivity;
  */
 public class PopularsLoader extends AsyncTask<String, String, String> {
 
+    int countOfNewItems;
 
     //ArrayList<Book> arrayList = new ArrayList<>();
     @Override
@@ -57,11 +58,12 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
         Log.d("435678", "Response: " + result);
         parseStuff(result);
         //BackgroundLoader.loadedBooks = arrayList;
-        DrawerActivity.getInstance().onSearchResultDownloaded();
+        DrawerActivity.getInstance().onSearchResultDownloaded(countOfNewItems);
     }
 
     void parseStuff(String result) {
         try {
+            countOfNewItems = 0;
             JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
             JSONArray jArray = jObject.getJSONObject("response").getJSONArray("items");
             for (int i = 0; i<jArray.length(); i++){
@@ -83,6 +85,7 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
                 book.category = Category.getCategoryById(tempObj.getJSONObject("category").getInt("id"));
                 book.countDl = tempObj.getInt("count_dl");
                 book.fave = tempObj.getBoolean("fave");
+                    countOfNewItems++;
                     DrawerActivity.getInstance().addBook(book);
                 }
                 catch (JSONException e){e.printStackTrace();}

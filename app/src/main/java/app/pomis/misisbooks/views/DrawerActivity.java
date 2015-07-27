@@ -170,7 +170,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
 
     // Выдача результатов поиска (или загрузки)
-    public void onSearchResultDownloaded() {
+    public void onSearchResultDownloaded(int countOfNewItems) {
         mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
                 (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
 
@@ -185,8 +185,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         } else mContentAdapter.notifyDataSetChanged();
         setListViewHeightBasedOnChildren(lv);
 
-        if (BackgroundLoader.loadedBooks.size() > 9)
+        if (countOfNewItems > 9)
             findViewById(R.id.footerContainer).setVisibility(View.VISIBLE);
+        else
+            findViewById(R.id.footerContainer).setVisibility(View.GONE);
         switch (mode) {
             case Modes.SEARCH:
                 ((TextView) findViewById(R.id.headerTitle)).setText("Результаты поиска");
@@ -201,7 +203,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((TextView) findViewById(R.id.headerTitle)).setText("Популярное за всё время");
                 break;
             case Modes.DOWNLOADS:
-                ((TextView) findViewById(R.id.headerTitle)).setText("Загрузки");
                 break;
         }
         mContentAdapter.notifyDataSetChanged();
@@ -342,9 +343,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                search.addSearchable(new SearchResult(search.getSearchText(), getResources().getDrawable(R.drawable.ic_history)));
+                search.setSearchString(search.getSearchText().trim());
+                search.addSearchable(new SearchResult(search.getSearchText().trim(), getResources().getDrawable(R.drawable.ic_history)));
                 ((ArrayAdapter) ((ListView) search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
                 mSearchAndLoadHistory.saveAll(search);
+                mSearchAndLoadHistory.loadAdd(search);
             }
 
             @Override
@@ -373,8 +376,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void setToolbarTitle() {
         if (mode == Modes.DOWNLOADS) {
-            toolbar.setTitle("MISIS Books");
-            setTitle("MISIS Books");
+            toolbar.setTitle("Загрузки");
+            //setTitle("MISIS Books");
         } else
             toolbar.setTitle("");
     }
@@ -666,6 +669,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     public void onDrawerClosed(View drawerView) {
                         if (mode == Modes.DOWNLOADS) {
                             showDownloadsList();
+                            (findViewById(R.id.headerLayout)).setVisibility(View.GONE);
                         }
 
                         //if (((ScrollView) findViewById(R.id.scrollViewId))!=null)
@@ -742,7 +746,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             //
                         }
                         if (mode == Modes.DOWNLOADS) {
-                            ((Spinner) findViewById(R.id.spinnerToolbar)).setVisibility(View.INVISIBLE);
+                            ((Spinner) findViewById(R.id.spinnerToolbar)).setVisibility(View.GONE);
+                            (findViewById(R.id.headerLayout)).setVisibility(View.GONE);
                             setToolbarTitle();
                         } else {
                             ((Spinner) findViewById(R.id.spinnerToolbar)).setVisibility(View.VISIBLE);
