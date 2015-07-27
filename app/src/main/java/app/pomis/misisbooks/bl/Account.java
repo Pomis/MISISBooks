@@ -5,10 +5,17 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 
+import app.pomis.misisbooks.api.Api;
+
 /**
  * Created by romanismagilov on 25.04.15.
  */
 public class Account {
+
+
+    public static String API_ID="4720039";
+    public static Account account = new Account();
+    public static Api api;
 
     //Singleton
     static Account singleton;

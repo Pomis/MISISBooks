@@ -83,7 +83,7 @@ public class PopularsLoader extends AsyncTask<String, String, String> {
                 book.category = Category.getCategoryById(tempObj.getJSONObject("category").getInt("id"));
                 book.countDl = tempObj.getInt("count_dl");
                 book.fave = tempObj.getBoolean("fave");
-                    BackgroundLoader.addBook(book);
+                    DrawerActivity.getInstance().addBook(book);
                 }
                 catch (JSONException e){e.printStackTrace();}
 

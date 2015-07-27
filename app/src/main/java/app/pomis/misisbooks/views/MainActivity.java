@@ -24,9 +24,7 @@ import app.pomis.misisbooks.bl.Account;
 public class MainActivity extends ActionBarActivity {
 
     private final int REQUEST_LOGIN = 1;
-    public static String API_ID="4720039";
-    public static Account account = new Account();
-    Api api;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +62,11 @@ public class MainActivity extends ActionBarActivity {
 
     public void logIn(View v) throws JSONException, IOException, KException {
         ArrayList<Long> test;
-        account.restore(this);
+        Account.account.restore(this);
 
         //Если сессия есть создаём API для обращения к серверу
-        if( account.access_token != null ) {
-            api = new Api(account.access_token, API_ID);
+        if( Account.account.access_token != null ) {
+            Account.api = new Api(Account.account.access_token, Account.API_ID);
             startActivity(new Intent(this, DrawerActivity.class));
 
             //postToWall();
@@ -94,11 +92,11 @@ public class MainActivity extends ActionBarActivity {
             case REQUEST_LOGIN:
                 if( resultCode == RESULT_OK ) {
                     //авторизовались успешно
-                    account.access_token = data.getStringExtra("token");
-                    account.user_id = data.getLongExtra("user_id", 0);
-                    account.save(MainActivity.this);
-                    api = new Api(account.access_token, API_ID);
-                    Toast.makeText(this, account.access_token, Toast.LENGTH_LONG).show();
+                    Account.account.access_token = data.getStringExtra("token");
+                    Account.account.user_id = data.getLongExtra("user_id", 0);
+                    Account.account.save(MainActivity.this);
+                    Account.api = new Api(Account.account.access_token, Account.API_ID);
+                    Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, DrawerActivity.class));
                 }
                 break;

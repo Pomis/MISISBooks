@@ -59,6 +59,7 @@ import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
+import app.pomis.misisbooks.bl.EncodingUtil;
 import app.pomis.misisbooks.bl.FileDownloader;
 import app.pomis.misisbooks.bl.SearchAndLoadHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
@@ -68,11 +69,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     static DrawerActivity singleton;
     Drawer mDrawer;
     Fragment fragment;
-    ContentAdapter mContentAdapter;
+    public ContentAdapter mContentAdapter;
     MaterialDialog mMaterialDialog;
     public int mode = 0; // 1 поиск
     public int downloadMode = 1;
     public boolean isContinuingLoading = false;
+
+    public void addBook(Book book) {
+        BackgroundLoader.addBook(book);
+        if (mContentAdapter!=null)
+            mContentAdapter.notifyDataSetChanged();
+    }
 
     class Modes {
         static public final int SEARCH = 1;
@@ -96,10 +103,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         setContentView(R.layout.activity_drawer);
 
 
-        String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token;
+        String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token;
         singleton = this;
         // Подключение к АПИ книжечек
-        new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + MainActivity.account.access_token);
+        new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
         BackgroundLoader.startLoadingCats();
 
 
@@ -158,7 +165,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
 
     public void doSearch() throws UnsupportedEncodingException {
-        BackgroundLoader.startLoadingSearchResults(URLEncoder.encode(search.getSearchText(), "UTF-8"), 10, 0, catId);
+        BackgroundLoader.startLoadingSearchResults(EncodingUtil.encodeURIComponent(search.getSearchText()), 10, 0, catId);
     }
 
 
@@ -197,6 +204,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((TextView) findViewById(R.id.headerTitle)).setText("Загрузки");
                 break;
         }
+        mContentAdapter.notifyDataSetChanged();
         if (!isContinuingLoading) {
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_UP);
         } else {
@@ -695,20 +703,20 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 case 3:
                                     fragment = new SearchFragment();
                                     mode = Modes.FAVS;
-                                    if (mContentAdapter != null && fragment != null)
-                                        BackgroundLoader.startLoadingFavs(1, 0, 10);
+                                    //if (mContentAdapter != null && fragment != null)
+                                    //    BackgroundLoader.startLoadingFavs(1, 0, 10);
                                     break;
                                 case 6:
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR_WEEK;
-                                    if (mContentAdapter != null && fragment != null)
-                                        BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
+                                    //if (mContentAdapter != null && fragment != null)
+                                    //    BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
                                     break;
                                 case 7:
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR;
-                                    if (mContentAdapter != null && fragment != null)
-                                        BackgroundLoader.startLoadingPopular(1, 0, 10);
+                                    //if (mContentAdapter != null && fragment != null)
+                                    //    BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
                                 case 2:
                                     fragment = new SearchFragment();
