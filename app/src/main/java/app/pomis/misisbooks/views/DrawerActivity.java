@@ -61,6 +61,7 @@ import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
 import app.pomis.misisbooks.bl.EncodingUtil;
 import app.pomis.misisbooks.bl.FileDownloader;
+import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.SearchAndLoadHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 
@@ -105,8 +106,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
         String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token;
         singleton = this;
-        // Подключение к АПИ книжечек
-        new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+
         BackgroundLoader.startLoadingCats();
 
 
@@ -138,12 +138,19 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         // Подрузка загруженных файлов
 
 
+        BackgroundLoader.startLoadingCats();
+        // Мы получили токен. Грузим аву и имя
+        new ResourcesLoader().execute("http://twosphere.ru/api/account.getInfo?access_token=" + Account.getInstance().twosphere_token);
+
+
         createNavigationDrawer();
         search.bringToFront();
         mSearchAndLoadHistory = new SearchAndLoadHistory(this);
         mSearchAndLoadHistory.loadAdd(search);
         mSearchAndLoadHistory.loadDownloadList();
         setToolbarTitle();
+        MainActivity.instance.finish();
+
     }
 
 
@@ -399,7 +406,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         .title(BackgroundLoader.loadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
-                        .negativeText("Удалить")
+                   //     .negativeText("Удалить")
                         .negativeColorAttr(Color.parseColor("#ffffff"))
                         .positiveColorRes(R.color.primaryColor)
                         .neutralColorAttr(Color.parseColor("#ffffff"))
@@ -508,7 +515,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     // Адаптер книжек
     //
-    class ContentAdapter extends ArrayAdapter {
+    public class ContentAdapter extends ArrayAdapter {
         private final Activity activity;
         private final List<String> list;
 
@@ -650,9 +657,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3)
-                        //new DividerDrawerItem(),
-                        //new SecondaryDrawerItem().withName(R.string.drawer_item_help).withIcon(getResources().getDrawable(R.drawable.ic_settings_black_24dp)).withIdentifier(4),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
+                        new DividerDrawerItem(),
+                        new SecondaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_settings_black_24dp)).withIdentifier(666)
                         //new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
                         //new DividerDrawerItem()
                         //,                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(FontAwesome.Icon.faw_github).withBadge("12+").withIdentifier(1)
@@ -681,7 +688,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     // Обработка клика
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
                         if (drawerItem instanceof Nameable) {
-                            Toast.makeText(DrawerActivity.this, DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()), Toast.LENGTH_SHORT).show();
+                         //   Toast.makeText(DrawerActivity.this, DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()), Toast.LENGTH_SHORT).show();
                         }
                         if (drawerItem instanceof Badgeable) {
                             Badgeable badgeable = (Badgeable) drawerItem;
@@ -729,6 +736,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     //if (mContentAdapter != null && fragment != null)
                                     //BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
+                                case 666:
+                                    quit();
+                                    break;
                                 default:
                                     break;
 
@@ -767,6 +777,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mDrawer.build();
 
 
+    }
+
+    private void quit() {
+        Account.clear();
+        finish();
     }
 
     //

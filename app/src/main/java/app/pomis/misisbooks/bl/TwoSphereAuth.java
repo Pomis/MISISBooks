@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import app.pomis.misisbooks.R;
+import app.pomis.misisbooks.views.MainActivity;
 
 /**
  * Created by romanismagilov on 30.06.15.
@@ -53,24 +54,32 @@ public class TwoSphereAuth extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         Log.d("435678", "Response: " + result);
-        parseToken(result);
-        BackgroundLoader.startLoadingCats();
-        // Мы получили токен. Грузим аву и имя
-        new ResourcesLoader().execute("http://twosphere.ru/api/account.getInfo?access_token="+Account.getInstance().twosphere_token);
+        if (result!=null) {
+            parseToken(result);
+        }
+        else{
+            Account.logged = false;
+        }
+        MainActivity.instance.openActivity(Account.logged);
+
 
 
     }
 
     void parseToken(String result) {
+        if (result != null) {
+            try {
+                JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
+                String tokenString = jObject.getJSONObject("response").getString("access_token");
+                Log.d("Parsed ", "token: " + tokenString);
+                Account.getInstance().twosphere_token = tokenString;
 
-        try {
-            JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
-            String tokenString = jObject.getJSONObject("response").getString("access_token");
-            Log.d("Parsed ", "token: "+tokenString);
-            Account.getInstance().twosphere_token=tokenString;
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            Log.d("err", "Вход не выполнен");
         }
 
         //MapPane.mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(55.887868, 37.381600), 10));

@@ -63,7 +63,9 @@ public class ResourcesLoader extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         Log.d("435678", "Response: " + result);
-        parseStuff(result);
+        if (result!=null) {
+            parseStuff(result);
+        }
 
     }
 

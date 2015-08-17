@@ -12,6 +12,7 @@ import app.pomis.misisbooks.api.Api;
  */
 public class Account {
 
+    public static boolean logged = true;
 
     public static String API_ID="4720039";
     public static Account account = new Account();
@@ -48,7 +49,7 @@ public class Account {
         twosphere_token=prefs.getString("twosphere_token", "");
     }
 
-    public void clear()
+    static public void clear()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         SharedPreferences.Editor editor=prefs.edit();

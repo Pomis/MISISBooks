@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -19,6 +21,7 @@ import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.api.Api;
 import app.pomis.misisbooks.api.KException;
 import app.pomis.misisbooks.bl.Account;
+import app.pomis.misisbooks.bl.TwoSphereAuth;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -26,17 +29,45 @@ public class MainActivity extends ActionBarActivity {
     private final int REQUEST_LOGIN = 1;
 
 
+    public static MainActivity instance;
+    private MaterialDialog mMaterialDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         setContentView(R.layout.activity_main);
         try {
-            logIn(findViewById(R.id.loginButton));
-        } catch (Exception e){
+            ArrayList<Long> test;
+            Account.account.restore(this);
+
+            //Если сессия есть создаём API для обращения к серверу
+            if (Account.account.access_token != null) {
+                Account.api = new Api(Account.account.access_token, Account.API_ID);
+                // Подключение к АПИ книжечек
+                new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+                //
+                mMaterialDialog = new MaterialDialog.Builder(this)
+                        .title("Подключение")
+                        .content("Выполняется подключение к библиотеке")
+                        .progress(true, 0)
+                        .show();
+            }
+        } catch (Exception e) {
 
         }
     }
 
+    public void openActivity(boolean logged){
+        if (logged)
+            startActivity(new Intent(this, DrawerActivity.class));
+        else
+            startActivity(new Intent(this, DownloadsOfflineActivity.class));
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -65,14 +96,16 @@ public class MainActivity extends ActionBarActivity {
         Account.account.restore(this);
 
         //Если сессия есть создаём API для обращения к серверу
-        if( Account.account.access_token != null ) {
+        if (Account.account.access_token != null) {
             Account.api = new Api(Account.account.access_token, Account.API_ID);
-            startActivity(new Intent(this, DrawerActivity.class));
-
-            //postToWall();
-            //Данные юзера есть, можно постить на стену
-            //api.createWallPost(1L, "test", null, null, false, false, false, null, null, null, 0L, null, null);
-
+            //startActivity(new Intent(this, DrawerActivity.class));
+            new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+            mMaterialDialog = new MaterialDialog.Builder(this)
+                    .title("Подключение")
+                    .content("Выполняется подключение к библиотеке")
+                    .progress(true, 0)
+                    .show();
+//            openActivity(Account.logged);
         } else {
             Intent intent = new Intent();
             intent.setClass(this, LoginWebActivity.class);
@@ -83,14 +116,13 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch( requestCode ) {
+        switch (requestCode) {
             //Получили авторизацию от контакта
             case REQUEST_LOGIN:
-                if( resultCode == RESULT_OK ) {
+                if (resultCode == RESULT_OK) {
                     //авторизовались успешно
                     Account.account.access_token = data.getStringExtra("token");
                     Account.account.user_id = data.getLongExtra("user_id", 0);
@@ -98,6 +130,8 @@ public class MainActivity extends ActionBarActivity {
                     Account.api = new Api(Account.account.access_token, Account.API_ID);
                     Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, DrawerActivity.class));
+                    // Подключение к АПИ книжечек
+                    new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
                 }
                 break;
             default:

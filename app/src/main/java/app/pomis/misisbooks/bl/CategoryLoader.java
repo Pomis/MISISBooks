@@ -53,7 +53,9 @@ public class CategoryLoader extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         Log.d("435678", "Response: " + result);
-        parseCats(result);
+        if (result != null) {
+            parseCats(result);
+        }
         DrawerActivity.getInstance().onCatsDownloaded();
     }
 
@@ -62,7 +64,7 @@ public class CategoryLoader extends AsyncTask<String, String, String> {
         try {
             JSONObject jObject = new JSONObject(result.substring(result.indexOf("{")));
             JSONArray jArray = jObject.getJSONObject("response").getJSONObject("response").getJSONArray("categories");
-            for (int i = 0; i<jArray.length(); i++){
+            for (int i = 0; i < jArray.length(); i++) {
                 JSONObject tempObj = jArray.getJSONObject(i);
                 Category category = new Category(tempObj.getInt("key"), tempObj.getString("category_name"),
                         tempObj.getString("color_hex")
