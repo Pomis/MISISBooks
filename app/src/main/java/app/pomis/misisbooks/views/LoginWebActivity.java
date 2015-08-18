@@ -3,13 +3,16 @@ package app.pomis.misisbooks.views;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import app.pomis.misisbooks.BuildConfig;
 import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.api.Auth;
 
@@ -41,6 +44,10 @@ public class LoginWebActivity extends Activity {
         String url = "https://oauth.vk.com/authorize?client_id=4720039&scope=65536&display=mobile&redirect_uri=https%3A//oauth.vk.com/blank.html&response_type=token&revoke=1&v=5.29";
         //System.out.print(url);
         webview.loadUrl(url);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+            findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
+        }
     }
 
     class VkontakteWebViewClient extends WebViewClient {

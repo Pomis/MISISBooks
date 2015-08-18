@@ -78,7 +78,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     public void addBook(Book book) {
         BackgroundLoader.addBook(book);
-        if (mContentAdapter!=null)
+        if (mContentAdapter != null)
             mContentAdapter.notifyDataSetChanged();
     }
 
@@ -95,7 +95,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         static public final int BROWSER_DOWNLOAD = 2;
     }
 
-    private Toolbar toolbar;
+    public Toolbar toolbar;
 
     // Запуск активности
     @Override
@@ -128,11 +128,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         // спрятать подложку статусбара для лоллипопа, если запущено на старом ведре
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             findViewById(R.id.statusBarLollipop).setVisibility(View.INVISIBLE);
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)toolbar.getLayoutParams();
-            params.setMargins(0,0,0,0);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toolbar.getLayoutParams();
+            params.setMargins(0, 0, 0, 0);
             toolbar.setLayoutParams(params);
-            params = (RelativeLayout.LayoutParams)search.getLayoutParams();
-            params.setMargins(-6,-4,-6,0);
+            params = (RelativeLayout.LayoutParams) search.getLayoutParams();
+            params.setMargins(-6, -4, -6, 0);
             search.setLayoutParams(params);
         }
         // Подрузка загруженных файлов
@@ -220,6 +220,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             ((ScrollView) findViewById(R.id.scrollViewId)).fullScroll(ScrollView.FOCUS_DOWN);
         }
 
+        toolbar.getMenu().getItem(0).setTitle("Поиск");
     }
 
     // Список загрузок
@@ -307,7 +308,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         search.setLogoText("");
         isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);
-
         //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
         search.setMenuListener(new SearchBox.MenuListener() {
 
@@ -406,7 +406,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         .title(BackgroundLoader.loadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
-                   //     .negativeText("Удалить")
+                                //     .negativeText("Удалить")
                         .negativeColorAttr(Color.parseColor("#ffffff"))
                         .positiveColorRes(R.color.primaryColor)
                         .neutralColorAttr(Color.parseColor("#ffffff"))
@@ -688,7 +688,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     // Обработка клика
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
                         if (drawerItem instanceof Nameable) {
-                         //   Toast.makeText(DrawerActivity.this, DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()), Toast.LENGTH_SHORT).show();
+                            //   Toast.makeText(DrawerActivity.this, DrawerActivity.this.getString(((Nameable) drawerItem).getNameRes()), Toast.LENGTH_SHORT).show();
                         }
                         if (drawerItem instanceof Badgeable) {
                             Badgeable badgeable = (Badgeable) drawerItem;
@@ -705,6 +705,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             }
                         }
                         Fragment fragment = null;
+                        DrawerActivity.getInstance().toolbar.getMenu().getItem(0)
+                                .setVisible(true);
                         if (drawerItem != null && drawerItem.getIdentifier() != 0)
                             switch (drawerItem.getIdentifier()) {
                                 case 1:
@@ -732,7 +734,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 case 2:
                                     fragment = new SearchFragment();
                                     mode = Modes.DOWNLOADS;
-
+                                    DrawerActivity.getInstance().toolbar.getMenu().getItem(0)
+                                            .setVisible(false);
                                     //if (mContentAdapter != null && fragment != null)
                                     //BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
@@ -788,6 +791,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //  Обновление Navi Drawer
     //
     boolean loaded = false;
+
     public void onResDownloaded() {
         ((ImageView) findViewById(R.id.header)).setImageBitmap(Account.photo);
         ((TextView) findViewById(R.id.headerText)).setText(Account.name);

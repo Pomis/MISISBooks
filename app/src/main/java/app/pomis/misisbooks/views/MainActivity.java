@@ -1,6 +1,7 @@
 package app.pomis.misisbooks.views;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         instance = this;
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+            findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
+        }
+
         try {
             ArrayList<Long> test;
             Account.account.restore(this);
@@ -51,6 +56,7 @@ public class MainActivity extends ActionBarActivity {
                         .title("Подключение")
                         .content("Выполняется подключение к библиотеке")
                         .progress(true, 0)
+                        .cancelable(false)
                         .show();
             }
         } catch (Exception e) {

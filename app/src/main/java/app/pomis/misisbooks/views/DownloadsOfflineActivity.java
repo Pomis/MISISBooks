@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
@@ -61,6 +62,9 @@ public class DownloadsOfflineActivity extends ActionBarActivity implements Adapt
         mToolbar.setTitle("Загрузки");
         Toast.makeText(this, "Нет подключения к сети. Доступен только список загрузок", Toast.LENGTH_LONG).show();
         MainActivity.instance.finish();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+            findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
+        }
     }
 
     public void showDownloadsList() {

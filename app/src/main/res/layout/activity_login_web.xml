@@ -7,7 +7,8 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="24dp"
-        android:background="#5C7FA8" />
+        android:background="#5C7FA8"
+        android:id="@+id/statusBarLollipop"/>
 
     <WebView
         android:layout_width="fill_parent"
