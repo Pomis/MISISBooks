@@ -13,12 +13,6 @@ public class Auth {
     public static String redirect_url2="http://oauth.vk.com/blank.html";
 
 
-    public static String getUrl(String api_id, String settings){
-        String url="https://oauth.vk.com/authorize?client_id=4720039&scope=65536&display=mobile&redirect_uri=https%3A//oauth.vk.com/blank.html&response_type=token&revoke=1&v=5.29";
-
-        return url;
-    }
-
     public static String[] parseRedirectUrl(String url) throws Exception {
         //url is something like http://api.vkontakte.ru/blank.html#access_token=66e8f7a266af0dd477fcd3916366b17436e66af77ac352aeb270be99df7deeb&expires_in=0&user_id=7657164
         String access_token= Utils.extractPattern(url, "access_token=(.*?)&");
