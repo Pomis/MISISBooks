@@ -128,7 +128,7 @@ public class MainActivity extends ActionBarActivity {
                     Account.account.user_id = data.getLongExtra("user_id", 0);
                     Account.account.save(MainActivity.this);
                     Account.api = new Api(Account.account.access_token, Account.API_ID);
-                    Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, DrawerActivity.class));
                     // Подключение к АПИ книжечек
                     new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
