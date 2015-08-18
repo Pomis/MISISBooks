@@ -3,17 +3,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/headerColor">
+
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="24dp"
         android:background="@color/primaryColor" />
 
+    <ImageView
+        android:layout_marginTop="100dp"
+        android:layout_width="match_parent"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:layout_height="wrap_content"
+        android:src="@drawable/twosphere"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Авторизируйтесь через ВКонтакте\nдля начала работы"
+        android:gravity="center"
+        android:textColor="@color/subTitle"
+        android:layout_gravity="center_horizontal" />
     <Button
         android:id="@+id/loginButton"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:text="Войти через ВК"
-        android:onClick="logIn"/>
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Войти"
+        android:gravity="center"
+        android:layout_margin="20dp"
+        android:onClick="logIn"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
