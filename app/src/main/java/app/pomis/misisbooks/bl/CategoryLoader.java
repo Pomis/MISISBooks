@@ -56,7 +56,6 @@ public class CategoryLoader extends AsyncTask<String, String, String> {
         if (result != null) {
             parseCats(result);
         }
-        DrawerActivity.getInstance().onCatsDownloaded();
     }
 
     void parseCats(String result) {

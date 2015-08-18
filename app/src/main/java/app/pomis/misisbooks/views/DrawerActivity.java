@@ -151,6 +151,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         setToolbarTitle();
         MainActivity.instance.finish();
 
+        mMaterialDialog = new MaterialDialog.Builder(this)
+                .title("Подключение")
+                .content("Выполняется подключение к библиотеке")
+                .progress(true, 0)
+                .cancelable(false)
+                .show();
+
     }
 
 
@@ -629,9 +636,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     private Drawer.Result drawerResult = null;
 
 
-    public void onCatsDownloaded() {
-    }
-
     //
     // Navigation Drawer, фрагмент по умолчанию
     //
@@ -806,6 +810,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
         }
         loaded = true;
+
+        mMaterialDialog.hide();
     }
 
     @Override

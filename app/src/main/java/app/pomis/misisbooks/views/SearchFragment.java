@@ -64,12 +64,11 @@ public class SearchFragment extends Fragment {
                     }
                 }
         );
-        if (((DrawerActivity)getActivity()).mode== DrawerActivity.Modes.SEARCH){
-            ((TextView)getActivity().findViewById(R.id.headerTitle)).setText("Выберите категорию и начните поиск");
-        }
-        else if (((DrawerActivity)getActivity()).mode== DrawerActivity.Modes.DOWNLOADS){
+        if (((DrawerActivity) getActivity()).mode == DrawerActivity.Modes.SEARCH) {
+            ((TextView) getActivity().findViewById(R.id.headerTitle)).setText("Выберите категорию и начните поиск");
+        } else if (((DrawerActivity) getActivity()).mode == DrawerActivity.Modes.DOWNLOADS) {
             (getActivity().findViewById(R.id.headerLayout)).setVisibility(View.GONE);
-            ((TextView)getActivity().findViewById(R.id.headerTitle)).setText("Загрузки");
+            ((TextView) getActivity().findViewById(R.id.headerTitle)).setText("Загрузки");
         }
     }
     //TODO: Новый фрагмент поиска с кустомизацией выдачи (количество позций)
