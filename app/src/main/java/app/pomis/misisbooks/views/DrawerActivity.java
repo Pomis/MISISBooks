@@ -17,11 +17,13 @@ import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -61,6 +63,7 @@ import app.pomis.misisbooks.bl.BackgroundLoader;
 import app.pomis.misisbooks.bl.Book;
 import app.pomis.misisbooks.bl.EncodingUtil;
 import app.pomis.misisbooks.bl.FileDownloader;
+import app.pomis.misisbooks.bl.MediaFileFunctions;
 import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.SearchAndLoadHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
@@ -126,7 +129,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         });
 
         // спрятать подложку статусбара для лоллипопа, если запущено на старом ведре
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             findViewById(R.id.statusBarLollipop).setVisibility(View.INVISIBLE);
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) toolbar.getLayoutParams();
             params.setMargins(0, 0, 0, 0);
@@ -135,6 +138,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             params.setMargins(-6, -4, -6, 0);
             search.setLayoutParams(params);
         }
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT)
+        findViewById(R.id.statusBarLollipop).setBackgroundColor(getResources().getColor(R.color.primaryColorDark));
         // Подрузка загруженных файлов
 
 
@@ -161,11 +166,15 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
 
+    boolean wasClosedByBackButton = false;
+
     // Кнопка назад
     @Override
     public void onBackPressed() {
         if (isSearchOpened) {
+            wasClosedByBackButton = true;
             closeSearch();
+            mSearchAction.setEnabled(true);
             return;
         }
         super.onBackPressed();
@@ -174,12 +183,21 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //region Поиск
     private MenuItem mSearchAction;
     SearchAndLoadHistory mSearchAndLoadHistory;
-    private boolean isSearchOpened = false;
+    public boolean isSearchOpened = false;
     public int catId = 1;
 
 
     public void doSearch() throws UnsupportedEncodingException {
-        BackgroundLoader.startLoadingSearchResults(EncodingUtil.encodeURIComponent(search.getSearchText()), 10, 0, catId);
+        ((TextView) findViewById(R.id.headerTitle)).setText("Идёт загрузка, пожалуйста подождите");
+        if (search.getSearchText().length() > 0) {
+            BackgroundLoader.startLoadingSearchResults(EncodingUtil.encodeURIComponent(search.getSearchText()), 10, 0, catId);
+            mode = Modes.SEARCH;
+        } else {
+            mode = Modes.POPULAR_WEEK;
+            BackgroundLoader.startLoadingPopularForWeek(catId, 0, 10);
+        }
+        //
+        hideKeyboard();
     }
 
 
@@ -251,6 +269,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mContentAdapter.notifyDataSetChanged();
     }
 
+    public void deleteBook(int position){
+        FileDownloader.downloadedBooks.remove(position);
+        mContentAdapter.notifyDataSetChanged();
+    }
+
 
     public void loadMore(View view) {
         isContinuingLoading = true;
@@ -304,6 +327,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         listView.requestLayout();
     }
 
+    private void hideKeyboard() {
+        // Check if no view has focus:
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+    }
+
     SearchBox search;
 
     //
@@ -313,6 +347,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         //setTitle("");
         setToolbarTitle();
         search.setLogoText("");
+        search.bringToFront();
         isSearchOpened = true;
         search.revealFromMenuItem(R.id.action_search, this);
         //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
@@ -339,6 +374,15 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 // Use this to un-tint the screen
                 closeSearch();
                 mSearchAction.setEnabled(true);
+                if (!wasClosedByBackButton) {
+                    try {
+                        if (search.getSearchText().length() == 0) doSearch();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    wasClosedByBackButton = false;
+                }
             }
 
             @Override
@@ -372,6 +416,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         });
 
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -413,21 +458,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         .title(BackgroundLoader.loadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
-                                //     .negativeText("Удалить")
+                        .negativeText("Удалить")
                         .negativeColorAttr(Color.parseColor("#ffffff"))
                         .positiveColorRes(R.color.primaryColor)
                         .neutralColorAttr(Color.parseColor("#ffffff"))
-                        .callback(new MaterialDialog.ButtonCallback() {
-                            @Override
-                            ///
-                            /// Удаление файла
-                            ///
-                            public void onNeutral(MaterialDialog dialog) {
-                                super.onNegative(dialog);
 
-
-                            }
-                        })
                         .callback(new MaterialDialog.ButtonCallback() {
                             @Override
                             ///
@@ -451,6 +486,28 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     }
                                 }
                             }
+
+                            @Override
+                            ///
+                            /// Удаление файла
+                            ///
+                            public void onNegative(MaterialDialog dialog) {
+                                super.onNegative(dialog);
+                                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                        FileDownloader.downloadedBooks.get(index).fileName);
+
+                                if (file.delete() ||
+                                        MediaFileFunctions.deleteViaContentProvider(DrawerActivity.getInstance(), FileDownloader.downloadedBooks.get(index).fileName)) {
+                                    Toast.makeText(DrawerActivity.getInstance(), "Файл удалён", Toast.LENGTH_SHORT).show();
+                                    //FileDownloader.downloadedBooks.remove(index);
+                                    DrawerActivity.getInstance().deleteBook(index);//refresh();
+                                }else{
+                                    Toast.makeText(DrawerActivity.getInstance(), "У приложения нет прав на удаление файлов", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                            }
+
                         })
                         .show();
 
@@ -657,13 +714,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 .withActionBarDrawerToggle(true)
                 .withHeader(vi)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(6),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(6),
+                        //new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
+                        //new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_settings_black_24dp)).withIdentifier(666)
+                        new SecondaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_exit_to_app_black_24dp)).withIdentifier(666)
                         //new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
                         //new DividerDrawerItem()
                         //,                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(FontAwesome.Icon.faw_github).withBadge("12+").withIdentifier(1)

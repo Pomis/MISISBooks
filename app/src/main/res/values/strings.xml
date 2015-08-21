@@ -28,7 +28,7 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="drawer_item_5">Популярное за неделю</string>
+    <string name="drawer_item_5">Поиск</string>
     <string name="drawer_item_6">Популярное за всё время</string>
     <string name="defaultSearchText">Идёт загрузка, пододите, пожалуйста</string>
     <string name="title_activity_downloads_offline">DownloadsOfflineActivity</string>

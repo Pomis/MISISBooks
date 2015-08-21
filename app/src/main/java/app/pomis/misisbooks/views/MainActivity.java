@@ -38,7 +38,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         instance = this;
         setContentView(R.layout.activity_main);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
             findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
         }
 

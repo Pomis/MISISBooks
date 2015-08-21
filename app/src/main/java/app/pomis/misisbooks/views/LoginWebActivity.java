@@ -45,7 +45,7 @@ public class LoginWebActivity extends Activity {
         //System.out.print(url);
         webview.loadUrl(url);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
             findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
         }
     }
