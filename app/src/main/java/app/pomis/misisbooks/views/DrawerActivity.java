@@ -188,6 +188,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
 
     public void doSearch() throws UnsupportedEncodingException {
+        findViewById(R.id.materialsNone).setVisibility(View.GONE);
         ((TextView) findViewById(R.id.headerTitle)).setText("Идёт загрузка, пожалуйста подождите");
         if (search.getSearchText().length() > 0) {
             BackgroundLoader.startLoadingSearchResults(EncodingUtil.encodeURIComponent(search.getSearchText()), 10, 0, catId);
@@ -246,6 +247,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
 
         toolbar.getMenu().getItem(0).setTitle("Поиск");
+        if ((mode == Modes.SEARCH || mode == Modes.FAVS || mode ==Modes.POPULAR_WEEK || mode == Modes.POPULAR)&&
+                BackgroundLoader.loadedBooks.size()==0){
+            findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
+            findViewById(R.id.materialsNone).bringToFront();
+        }
+        else
+            findViewById(R.id.materialsNone).setVisibility(View.GONE);
     }
 
     // Список загрузок
@@ -717,8 +725,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         new PrimaryDrawerItem().withName(R.string.drawer_item_5).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(6),
                         //new PrimaryDrawerItem().withName(R.string.drawer_item_6).withIcon(getResources().getDrawable(R.drawable.ic_thumb_up_black_24dp)).withBadge("").withIdentifier(7),
                         //new PrimaryDrawerItem().withName(R.string.drawer_item_1).withIcon(getResources().getDrawable(R.drawable.ic_search_black_24dp)).withBadge("").withIdentifier(1),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new DividerDrawerItem(),
                         new SecondaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_exit_to_app_black_24dp)).withIdentifier(666)
                         //new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
@@ -845,6 +853,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     private void quit() {
         Account.clear();
+        if (MainActivity.instance!=null) MainActivity.instance.finish();
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 

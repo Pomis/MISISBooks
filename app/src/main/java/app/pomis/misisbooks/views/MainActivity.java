@@ -1,5 +1,6 @@
 package app.pomis.misisbooks.views;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -50,14 +51,21 @@ public class MainActivity extends ActionBarActivity {
             if (Account.account.access_token != null) {
                 Account.api = new Api(Account.account.access_token, Account.API_ID);
                 // Подключение к АПИ книжечек
-                new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+                final TwoSphereAuth auth = new TwoSphereAuth();
+                auth.execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
                 //
                 mMaterialDialog = new MaterialDialog.Builder(this)
                         .title("Подключение")
                         .content("Выполняется подключение к библиотеке")
                         .progress(true, 0)
-                        .cancelable(false)
                         .show();
+                mMaterialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        auth.cancel(true);
+                        //Account.clear();
+                    }
+                });
             }
         } catch (Exception e) {
 
@@ -105,12 +113,21 @@ public class MainActivity extends ActionBarActivity {
         if (Account.account.access_token != null) {
             Account.api = new Api(Account.account.access_token, Account.API_ID);
             //startActivity(new Intent(this, DrawerActivity.class));
-            new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+            final TwoSphereAuth auth = new TwoSphereAuth();
+            auth.execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+            //
             mMaterialDialog = new MaterialDialog.Builder(this)
                     .title("Подключение")
                     .content("Выполняется подключение к библиотеке")
                     .progress(true, 0)
                     .show();
+            mMaterialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    auth.cancel(true);
+                    //Account.clear();
+                }
+            });
 //            openActivity(Account.logged);
         } else {
             Intent intent = new Intent();

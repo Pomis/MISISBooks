@@ -70,6 +70,7 @@ public class SearchFragment extends Fragment {
             (getActivity().findViewById(R.id.headerLayout)).setVisibility(View.GONE);
             ((TextView) getActivity().findViewById(R.id.headerTitle)).setText("Загрузки");
         }
+        getActivity().findViewById(R.id.materialsNone).setVisibility(View.GONE);
     }
     //TODO: Новый фрагмент поиска с кустомизацией выдачи (количество позций)
 
