@@ -13,6 +13,6 @@
         android:layout_marginTop="2px"
         android:text="Название категории"
         android:textColor="#ffffff"
-        android:textSize="18dp"
+        android:textSize="17dp"
         android:layout_centerVertical="true"/>
 </RelativeLayout>

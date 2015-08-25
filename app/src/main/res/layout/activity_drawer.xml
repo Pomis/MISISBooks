@@ -22,7 +22,10 @@
             android:popupBackground="#ff434343"
             android:layout_width="wrap_content"
             android:minWidth="20dp"
-            android:layout_height="20dp"
+            android:layout_height="fill_parent"
+            android:textAlignment="center"
+            android:minHeight="20dp"
+
             android:id="@+id/spinnerToolbar" />
         </android.support.v7.widget.Toolbar>
 
