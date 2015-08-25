@@ -2,9 +2,10 @@
 <resources>
     <color name="primaryColor">#fc484c</color>
     <color name="primaryColorDark">#b33336</color>
-    <color name="searchBackground">#fff4f4f4</color>
-    <color name="cardBackground">#fff4f4f4</color>
+    <color name="searchBackground">#FAFAFA</color>
+    <color name="cardBackground">#FAFAFA</color>
     <color name="title">#202020</color>
     <color name="subTitle">#727272</color>
     <color name="headerColor">#e4e4e4</color>
+    <color name="selectColor">#E8E8E8</color>
 </resources>

@@ -357,6 +357,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         search.setLogoText("");
         search.bringToFront();
         isSearchOpened = true;
+        findViewById(R.id.mic).setVisibility(View.GONE);
         search.revealFromMenuItem(R.id.action_search, this);
         //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
         search.setMenuListener(new SearchBox.MenuListener() {
@@ -728,7 +729,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         new PrimaryDrawerItem().withName(R.string.drawer_item_3).withIcon(getResources().getDrawable(R.drawable.ic_star_border_black_24dp)).withBadge("").withIdentifier(3),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_2).withIcon(getResources().getDrawable(R.drawable.ic_file_download_black_24dp)).withIdentifier(2),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_exit_to_app_black_24dp)).withIdentifier(666)
+                        new PrimaryDrawerItem().withName("Выход").withIcon(getResources().getDrawable(R.drawable.ic_exit_to_app_black_24dp)).withIdentifier(666)
                         //new SecondaryDrawerItem().withName(R.string.drawer_item_4).withIcon(FontAwesome.Icon.faw_question).setEnabled(false).withIdentifier(5),
                         //new DividerDrawerItem()
                         //,                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(FontAwesome.Icon.faw_github).withBadge("12+").withIdentifier(1)
