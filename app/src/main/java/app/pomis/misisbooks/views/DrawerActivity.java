@@ -260,6 +260,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     // Список загрузок
     public void showDownloadsList() {
+        SearchAndLoadHistory.getInstance().loadDownloadList();
         mContentAdapter = new ContentAdapter(this, R.layout.book_layout, FileDownloader.downloadedBooks);
         ListView lv = ((ListView) findViewById(R.id.search_result));
         lv.setAdapter(mContentAdapter);
