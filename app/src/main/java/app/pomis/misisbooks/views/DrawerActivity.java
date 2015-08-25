@@ -16,6 +16,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -375,7 +377,28 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             public void onSearchOpened() {
                 // Use this to tint the screen
                 mSearchAction.setEnabled(false);
+                //((ImageView)findViewById(R.id.mic)).setMaxHeight(0);
+                //((ImageView)findViewById(R.id.mic)).setMaxWidth(0);
+                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(false);
                 findViewById(R.id.mic).setVisibility(View.GONE);
+                ((EditText)findViewById(R.id.search)).addTextChangedListener(new TextWatcher() {
+
+
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+
+                    }
+                });
             }
 
             @Override
@@ -392,6 +415,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 } else {
                     wasClosedByBackButton = false;
                 }
+                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(true);
+
             }
 
             @Override
@@ -415,11 +440,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((ArrayAdapter) ((ListView) search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
                 mSearchAndLoadHistory.saveAll(search);
                 mSearchAndLoadHistory.loadAdd(search);
+                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(false);
+
             }
 
             @Override
             public void onSearchCleared() {
-                findViewById(R.id.mic).setVisibility(View.GONE);
+               // findViewById(R.id.mic).setVisibility(View.GONE);
+               // ((ImageView)findViewById(R.id.mic)).setEnabled(false);
             }
 
         });
