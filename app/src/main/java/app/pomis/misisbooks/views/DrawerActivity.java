@@ -357,7 +357,6 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         search.setLogoText("");
         search.bringToFront();
         isSearchOpened = true;
-        findViewById(R.id.mic).setVisibility(View.GONE);
         search.revealFromMenuItem(R.id.action_search, this);
         //.setDrawerLogo(getDrawable(R.drawable.ic_drawer));
         search.setMenuListener(new SearchBox.MenuListener() {
@@ -376,6 +375,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             public void onSearchOpened() {
                 // Use this to tint the screen
                 mSearchAction.setEnabled(false);
+                findViewById(R.id.mic).setVisibility(View.GONE);
             }
 
             @Override
@@ -419,7 +419,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             @Override
             public void onSearchCleared() {
-
+                findViewById(R.id.mic).setVisibility(View.GONE);
             }
 
         });
