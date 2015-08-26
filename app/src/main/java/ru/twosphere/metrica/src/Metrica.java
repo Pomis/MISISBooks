@@ -12,6 +12,9 @@ public class Metrica {
     public static final String METRICA_URI = "http://twosphere.ru/stats/track";
 
     public void track(String event) {
+        if (BuildVars.METRICA_API_KEY.isEmpty()) {
+            return;
+        }
         try {
             ConnectionManager connection = new ConnectionManager();
 
