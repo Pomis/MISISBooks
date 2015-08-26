@@ -69,7 +69,7 @@
                     android:layout_centerVertical="true"
                     android:textColor="@color/subTitle"
                     android:id="@+id/footerTitle"
-                    android:text="Следующие 10"
+                    android:text="Показать следующие 10"
                     />
             </RelativeLayout>
             </com.balysv.materialripple.MaterialRippleLayout>
