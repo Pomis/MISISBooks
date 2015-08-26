@@ -42,6 +42,15 @@
                 android:longClickable="true"
                 android:clickable="true" />
 
+            <com.balysv.materialripple.MaterialRippleLayout
+                android:id="@+id/ripple"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                app:mrl_rippleOverlay="true"
+                app:mrl_rippleColor="@color/primaryColor"
+                >
             <RelativeLayout
 
                 xmlns:android="http://schemas.android.com/apk/res/android"
@@ -60,9 +69,10 @@
                     android:layout_centerVertical="true"
                     android:textColor="@color/subTitle"
                     android:id="@+id/footerTitle"
-                    android:text="Далее"
+                    android:text="Следующие 10"
                     />
             </RelativeLayout>
+            </com.balysv.materialripple.MaterialRippleLayout>
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

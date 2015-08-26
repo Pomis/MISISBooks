@@ -276,6 +276,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mContentAdapter.notifyDataSetChanged();
         setListViewHeightBasedOnChildren(lv);
         ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
+
+        if (FileDownloader.downloadedBooks.size()==0){
+            findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
+        }
+        else{
+            findViewById(R.id.materialsNone).setVisibility(View.GONE);
+
+        }
     }
 
     // Обновление содержимого
