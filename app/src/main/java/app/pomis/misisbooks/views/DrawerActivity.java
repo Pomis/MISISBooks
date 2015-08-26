@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -69,6 +70,7 @@ import app.pomis.misisbooks.bl.MediaFileFunctions;
 import app.pomis.misisbooks.bl.ResourcesLoader;
 import app.pomis.misisbooks.bl.SearchAndLoadHistory;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
+import ru.twosphere.metrica.src.Metrica;
 
 
 public class DrawerActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
@@ -80,6 +82,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     public int mode = 0; // 1 поиск
     public int downloadMode = 1;
     public boolean isContinuingLoading = false;
+    Metrica metrica = new Metrica();
 
     public void addBook(Book book) {
         BackgroundLoader.addBook(book);
@@ -108,6 +111,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
 
+        metrica.track("RUN_APPLICATION");
 
         String test = "http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token;
         singleton = this;
@@ -173,6 +177,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     // Кнопка назад
     @Override
     public void onBackPressed() {
+        metrica.track("BACK_BUTTON_PRESSED");
+
         if (isSearchOpened) {
             wasClosedByBackButton = true;
             closeSearch();
@@ -260,6 +266,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     // Список загрузок
     public void showDownloadsList() {
+        metrica.track("DOWNLOADS_SHOW_LIST");
+
         SearchAndLoadHistory.getInstance().loadDownloadList();
         mContentAdapter = new ContentAdapter(this, R.layout.book_layout, FileDownloader.downloadedBooks);
         ListView lv = ((ListView) findViewById(R.id.search_result));
@@ -280,8 +288,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         mContentAdapter.notifyDataSetChanged();
     }
 
-    public void deleteBook(int position){
+    public void deleteBook(int position) {
         FileDownloader.downloadedBooks.remove(position);
+        metrica.track("BOOK_DELETED_FROM_STORAGE");
         mContentAdapter.notifyDataSetChanged();
     }
 
@@ -290,15 +299,19 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         isContinuingLoading = true;
         switch (mode) {
             case Modes.POPULAR:
+                metrica.track("POPULAR_MORE_LOADED");
                 BackgroundLoader.continueLoadingPopular(catId, BackgroundLoader.loadedBooks.size(), 10);
                 break;
             case Modes.FAVS:
+                metrica.track("FAVE_MORE_LOADED");
                 BackgroundLoader.continueLoadingFavs(catId, BackgroundLoader.loadedBooks.size(), 10);
                 break;
             case Modes.POPULAR_WEEK:
+                metrica.track("POPULAR_WEEK_MORE_LOADED");
                 BackgroundLoader.continueLoadingPopularForWeek(catId, BackgroundLoader.loadedBooks.size(), 10);
                 break;
             case Modes.SEARCH:
+                metrica.track("SEARCH_MORE_LOADED");
                 BackgroundLoader.continueLoadingSearchResults(search.getSearchText(), 10, BackgroundLoader.loadedBooks.size(), catId);
                 break;
         }
@@ -376,6 +389,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             @Override
             public void onSearchOpened() {
+                metrica.track("SEARCH_TOOLBAR_OPENED");
+
                 // Use this to tint the screen
                 mSearchAction.setEnabled(false);
                 //((ImageView)findViewById(R.id.mic)).setMaxHeight(0);
@@ -404,6 +419,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
             @Override
             public void onSearchClosed() {
+                metrica.track("SEARCH_TOOLBAR_CLOSED");
+
                 // Use this to un-tint the screen
                 closeSearch();
                 mSearchAction.setEnabled(true);
@@ -484,6 +501,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     //
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        metrica.track("ITEM_CLICKED");
+
         final int index = i;
         String descr = "";
         descr = "Авторы: " + BackgroundLoader.loadedBooks.get(i).getAuthorsToString() +
@@ -507,6 +526,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             /// Открытие скачанного файла
                             ///
                             public void onPositive(MaterialDialog dialog) {
+                                metrica.track("OPEN_DOWNLOADED_FILE");
+
                                 super.onPositive(dialog);
                                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                                         FileDownloader.downloadedBooks.get(index).fileName);
@@ -520,7 +541,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                         startActivity(intent);
                                         //finish();
                                     } catch (ActivityNotFoundException e) {
-                                        Toast.makeText(DrawerActivity.getInstance(), "Нечем открывать файл этого типа", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(DrawerActivity.getInstance(), "Невозможно открыть файл с данным типом", Toast.LENGTH_LONG).show();
                                     }
                                 }
                             }
@@ -530,6 +551,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             /// Удаление файла
                             ///
                             public void onNegative(MaterialDialog dialog) {
+                                metrica.track("DELETE_DOWNLOADED_FILE");
+
                                 super.onNegative(dialog);
                                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                                         FileDownloader.downloadedBooks.get(index).fileName);
@@ -540,7 +563,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     //FileDownloader.downloadedBooks.remove(index);
                                     DrawerActivity.getInstance().deleteBook(index);//refresh();
                                 }else{
-                                    Toast.makeText(DrawerActivity.getInstance(), "У приложения нет прав на удаление файлов", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(DrawerActivity.getInstance(), "У данного приложения нет прав на удаление файлов", Toast.LENGTH_SHORT).show();
 
                                 }
 
@@ -566,6 +589,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                 // Если книга не скачана, то начинаем-с скачивать её
                                 if (!FileDownloader.checkIfDownloaded(BackgroundLoader.loadedBooks.get(index))) {
 
+                                    metrica.track("START_DOWNLOAD");
+
                                     String url = BackgroundLoader.loadedBooks.get(index).downloadUrl;
 
                                     if (downloadMode == Settings.BROWSER_DOWNLOAD) {
@@ -580,6 +605,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                             @Override
                             public void onNeutral(MaterialDialog dialog) {
                                 super.onNeutral(dialog);
+
+                                metrica.track("TOGGLE_FAVE");
+
                                 if (!BackgroundLoader.loadedBooks.get(index).fave) {
                                     BackgroundLoader.loadedBooks.get(index).fave = true;
                                     BackgroundLoader.addOrRemoveFromFavs(BackgroundLoader.loadedBooks.get(index).id, false);
@@ -767,12 +795,17 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                     @Override
                     public void onDrawerOpened(View drawerView) {
                         // Скрываем клавиатуру при открытии Navigation Drawer
+
+                        metrica.track("NAVIGATION_DRAWER_OPENED");
+
                         InputMethodManager inputMethodManager = (InputMethodManager) DrawerActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
                         inputMethodManager.hideSoftInputFromWindow(DrawerActivity.this.getCurrentFocus().getWindowToken(), 0);
                     }
 
                     @Override
                     public void onDrawerClosed(View drawerView) {
+                        metrica.track("NAVIGATION_DRAWER_CLOSED");
+
                         if (mode == Modes.DOWNLOADS) {
                             showDownloadsList();
                             (findViewById(R.id.headerLayout)).setVisibility(View.GONE);
@@ -809,28 +842,38 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         if (drawerItem != null && drawerItem.getIdentifier() != 0)
                             switch (drawerItem.getIdentifier()) {
                                 case 1:
+                                    metrica.track("GO_TO_SEARCH");
+
                                     fragment = new SearchFragment();
                                     mode = Modes.SEARCH;
                                     break;
                                 case 3:
+                                    metrica.track("GO_TO_FAVES");
+
                                     fragment = new SearchFragment();
                                     mode = Modes.FAVS;
                                     //if (mContentAdapter != null && fragment != null)
                                     //    BackgroundLoader.startLoadingFavs(1, 0, 10);
                                     break;
                                 case 6:
+                                    metrica.track("GO_TO_POPULAR_FOR_WEEK");
+
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR_WEEK;
                                     //if (mContentAdapter != null && fragment != null)
                                     //    BackgroundLoader.startLoadingPopularForWeek(1, 0, 10);
                                     break;
                                 case 7:
+                                    metrica.track("GO_TO_POPULAR");
+
                                     fragment = new SearchFragment();
                                     mode = Modes.POPULAR;
                                     //if (mContentAdapter != null && fragment != null)
                                     //    BackgroundLoader.startLoadingPopular(1, 0, 10);
                                     break;
                                 case 2:
+                                    metrica.track("GO_TO_DOWNLOADS");
+
                                     fragment = new SearchFragment();
                                     mode = Modes.DOWNLOADS;
                                     DrawerActivity.getInstance().toolbar.getMenu().getItem(0)
@@ -882,6 +925,8 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
     private void quit() {
+        metrica.track("ACCOUNT_QUIT");
+
         Account.clear();
         if (MainActivity.instance!=null) MainActivity.instance.finish();
         startActivity(new Intent(this, MainActivity.class));

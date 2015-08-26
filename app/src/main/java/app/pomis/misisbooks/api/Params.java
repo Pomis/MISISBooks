@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 public class Params {
-    //TreeMap нужен был чтобы сортировать параметры по имени, сейчас это уже не важно, главно подписывать и передавать параметры в одном и тотм же порядке
+    //TreeMap нужен был чтобы сортировать параметры по имени, сейчас это уже не важно, главно подписывать и передавать параметры в одном и том же порядке
     private TreeMap<String, String> args = new TreeMap<String, String>();
     String method_name;
     
