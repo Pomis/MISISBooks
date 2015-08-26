@@ -39,45 +39,38 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         instance = this;
         setContentView(R.layout.activity_main);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
         }
 
         try {
-            ArrayList<Long> test;
-            Account.account.restore(this);
-
-            //Если сессия есть создаём API для обращения к серверу
-            if (Account.account.access_token != null) {
-                Account.api = new Api(Account.account.access_token, Account.API_ID);
-                // Подключение к АПИ книжечек
-                final TwoSphereAuth auth = new TwoSphereAuth();
-                auth.execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
-                //
-                mMaterialDialog = new MaterialDialog.Builder(this)
-                        .title("Подключение")
-                        .content("Выполняется подключение к библиотеке")
-                        .progress(true, 0)
-                        .show();
-                mMaterialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        auth.cancel(true);
-                        //Account.clear();
-                    }
-                });
-            }
+            log();
         } catch (Exception e) {
 
         }
     }
 
-    public void openActivity(boolean logged){
+    public boolean log() {
+        Account.account.restore(this);
+        // Если есть токен входа в 2сфере
+        if (Account.account.twosphere_token != null) {
+            Account.api = new Api(Account.account.access_token, Account.API_ID);
+            startActivity(new Intent(this, DrawerActivity.class));
+
+        } else
+            return false;
+        return true;
+    }
+
+    // Срабатывает при авторизации через 2сферы
+    public void openActivity(boolean logged) {
+        Account.account.save(this);
         if (logged)
             startActivity(new Intent(this, DrawerActivity.class));
         else
             startActivity(new Intent(this, DownloadsOfflineActivity.class));
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -105,31 +98,13 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Нажатие на кнопку авторизации
     public void logIn(View v) throws JSONException, IOException, KException {
         ArrayList<Long> test;
+        // Загружаем 2сфере токен из префс
         Account.account.restore(this);
 
-        //Если сессия есть создаём API для обращения к серверу
-        if (Account.account.access_token != null) {
-            Account.api = new Api(Account.account.access_token, Account.API_ID);
-            //startActivity(new Intent(this, DrawerActivity.class));
-            final TwoSphereAuth auth = new TwoSphereAuth();
-            auth.execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
-            //
-            mMaterialDialog = new MaterialDialog.Builder(this)
-                    .title("Подключение")
-                    .content("Выполняется подключение к библиотеке")
-                    .progress(true, 0)
-                    .show();
-            mMaterialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialogInterface) {
-                    auth.cancel(true);
-                    //Account.clear();
-                }
-            });
-//            openActivity(Account.logged);
-        } else {
+        if (!log()){
             Intent intent = new Intent();
             intent.setClass(this, LoginWebActivity.class);
 
@@ -146,15 +121,30 @@ public class MainActivity extends ActionBarActivity {
             //Получили авторизацию от контакта
             case REQUEST_LOGIN:
                 if (resultCode == RESULT_OK) {
+
                     //авторизовались успешно
                     Account.account.access_token = data.getStringExtra("token");
+                    final TwoSphereAuth auth = new TwoSphereAuth();
+                    auth.execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
                     Account.account.user_id = data.getLongExtra("user_id", 0);
+                    //Account.account.twosphere_token = data.getStringExtra("twosphere_token");
                     Account.account.save(MainActivity.this);
                     Account.api = new Api(Account.account.access_token, Account.API_ID);
                     //Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(this, DrawerActivity.class));
+                    //startActivity(new Intent(this, DrawerActivity.class));
                     // Подключение к АПИ книжечек
-                    new TwoSphereAuth().execute("http://twosphere.ru/api/auth.signin?vk_access_token=" + Account.account.access_token);
+                    mMaterialDialog = new MaterialDialog.Builder(this)
+                            .title("Подключение")
+                            .content("Выполняется подключение к библиотеке")
+                            .progress(true, 0)
+                            .show();
+                    mMaterialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface) {
+                            auth.cancel(true);
+                            Account.clear();
+                        }
+                    });
                 }
                 break;
             default:

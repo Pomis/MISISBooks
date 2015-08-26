@@ -44,9 +44,9 @@ public class Account {
         if (ctx == null)
             ctx = context;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        access_token=prefs.getString("access_token", null);
+        twosphere_token=prefs.getString("twosphere_token", twosphere_token);
+        access_token = prefs.getString("access_token", null);
         user_id=prefs.getLong("user_id", 0);
-        twosphere_token=prefs.getString("twosphere_token", "");
     }
 
     static public void clear()

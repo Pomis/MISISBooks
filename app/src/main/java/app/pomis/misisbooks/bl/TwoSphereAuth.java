@@ -60,6 +60,7 @@ public class TwoSphereAuth extends AsyncTask<String, String, String> {
         else{
             Account.logged = false;
         }
+
         MainActivity.instance.openActivity(Account.logged);
 
 
