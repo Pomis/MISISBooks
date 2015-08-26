@@ -570,6 +570,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     Toast.makeText(DrawerActivity.getInstance(), "Файл удалён", Toast.LENGTH_SHORT).show();
                                     //FileDownloader.downloadedBooks.remove(index);
                                     DrawerActivity.getInstance().deleteBook(index);//refresh();
+                                    if (FileDownloader.downloadedBooks.size()==0){
+                                        findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
+                                    }
+                                    else{
+                                        findViewById(R.id.materialsNone).setVisibility(View.GONE);
+
+                                    }
                                 }else{
                                     Toast.makeText(DrawerActivity.getInstance(), "У данного приложения нет прав на удаление файлов", Toast.LENGTH_SHORT).show();
 
