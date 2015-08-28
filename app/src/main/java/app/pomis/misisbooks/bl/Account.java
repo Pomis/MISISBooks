@@ -54,6 +54,6 @@ public class Account {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         SharedPreferences.Editor editor=prefs.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
     }
 }

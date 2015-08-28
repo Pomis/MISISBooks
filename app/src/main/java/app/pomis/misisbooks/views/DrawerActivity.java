@@ -941,7 +941,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
     private void quit() {
         metrica.track("ACCOUNT_QUIT");
-
+        Account.account.twosphere_token = null;
         Account.clear();
         if (MainActivity.instance!=null) MainActivity.instance.finish();
         startActivity(new Intent(this, MainActivity.class));
