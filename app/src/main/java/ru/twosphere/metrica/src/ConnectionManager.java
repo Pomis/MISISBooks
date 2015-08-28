@@ -21,17 +21,11 @@ public class ConnectionManager {
 
     private final String LOG_TAG = HttpRequestBuilder.class.getSimpleName();
 
-    public void request(String... params) {
+    public void request(URL url, HashMap<String, String> requestParams) {
         try {
-            HashMap<String, String> requestParams = new HashMap<>();
-            requestParams.put("event", params[0]);
-            requestParams.put("user_token", params[1]);
-            requestParams.put("device_id", params[2]);
-            requestParams.put("api_key", BuildVars.METRICA_API_KEY);
-
             HttpRequestBuilder builder = new HttpRequestBuilder();
             builder.setParams(requestParams);
-            builder.setUri(Metrica.METRICA_URI);
+            builder.setUri(url.toString());
 
             HttpAsyncTask task = new HttpAsyncTask();
             task.setRequestMethod(HttpAsyncTask.GET_REQUEST_NAME);

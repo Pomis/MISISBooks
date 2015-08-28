@@ -2,5 +2,8 @@
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
+/.idea
+.idea
 .DS_Store
 /build
+app/src/main/java/ru/twosphere/metrica/src/BuildVars.java
