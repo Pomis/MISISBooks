@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -145,7 +147,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
             search.setLayoutParams(params);
         }
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT)
-        findViewById(R.id.statusBarLollipop).setBackgroundColor(getResources().getColor(R.color.primaryColorDark));
+            findViewById(R.id.statusBarLollipop).setBackgroundColor(getResources().getColor(R.color.primaryColorDark));
         // Подрузка загруженных файлов
 
 
@@ -182,6 +184,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         if (isSearchOpened) {
             wasClosedByBackButton = true;
             closeSearch();
+            isSearchOpened = false;
             mSearchAction.setEnabled(true);
             return;
         }
@@ -255,12 +258,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         }
 
         toolbar.getMenu().getItem(0).setTitle("Поиск");
-        if ((mode == Modes.SEARCH || mode == Modes.FAVS || mode ==Modes.POPULAR_WEEK || mode == Modes.POPULAR)&&
-                BackgroundLoader.loadedBooks.size()==0){
+        if ((mode == Modes.SEARCH || mode == Modes.FAVS || mode == Modes.POPULAR_WEEK || mode == Modes.POPULAR) &&
+                BackgroundLoader.loadedBooks.size() == 0) {
             findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
             findViewById(R.id.materialsNone).bringToFront();
-        }
-        else
+        } else
             findViewById(R.id.materialsNone).setVisibility(View.GONE);
     }
 
@@ -277,10 +279,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         setListViewHeightBasedOnChildren(lv);
         ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
 
-        if (FileDownloader.downloadedBooks.size()==0){
+        if (FileDownloader.downloadedBooks.size() == 0) {
             findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             findViewById(R.id.materialsNone).setVisibility(View.GONE);
 
         }
@@ -403,9 +404,9 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 mSearchAction.setEnabled(false);
                 //((ImageView)findViewById(R.id.mic)).setMaxHeight(0);
                 //((ImageView)findViewById(R.id.mic)).setMaxWidth(0);
-                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(false);
+                ((Spinner) findViewById(R.id.spinnerToolbar)).setEnabled(false);
                 findViewById(R.id.mic).setVisibility(View.GONE);
-                ((EditText)findViewById(R.id.search)).addTextChangedListener(new TextWatcher() {
+                ((EditText) findViewById(R.id.search)).addTextChangedListener(new TextWatcher() {
 
 
                     @Override
@@ -441,7 +442,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 } else {
                     wasClosedByBackButton = false;
                 }
-                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(true);
+                ((Spinner) findViewById(R.id.spinnerToolbar)).setEnabled(true);
 
             }
 
@@ -466,14 +467,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 ((ArrayAdapter) ((ListView) search.findViewById(R.id.results)).getAdapter()).notifyDataSetChanged();
                 mSearchAndLoadHistory.saveAll(search);
                 mSearchAndLoadHistory.loadAdd(search);
-                ((Spinner)findViewById(R.id.spinnerToolbar)).setEnabled(false);
+                ((Spinner) findViewById(R.id.spinnerToolbar)).setEnabled(false);
 
             }
 
             @Override
             public void onSearchCleared() {
-               // findViewById(R.id.mic).setVisibility(View.GONE);
-               // ((ImageView)findViewById(R.id.mic)).setEnabled(false);
+                // findViewById(R.id.mic).setVisibility(View.GONE);
+                // ((ImageView)findViewById(R.id.mic)).setEnabled(false);
             }
 
         });
@@ -570,14 +571,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                                     Toast.makeText(DrawerActivity.getInstance(), "Файл удалён", Toast.LENGTH_SHORT).show();
                                     //FileDownloader.downloadedBooks.remove(index);
                                     DrawerActivity.getInstance().deleteBook(index);//refresh();
-                                    if (FileDownloader.downloadedBooks.size()==0){
+                                    if (FileDownloader.downloadedBooks.size() == 0) {
                                         findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
-                                    }
-                                    else{
+                                    } else {
                                         findViewById(R.id.materialsNone).setVisibility(View.GONE);
 
                                     }
-                                }else{
+                                } else {
                                     Toast.makeText(DrawerActivity.getInstance(), "У данного приложения нет прав на удаление файлов", Toast.LENGTH_SHORT).show();
 
                                 }
@@ -934,6 +934,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                         return false;
                     }
                 });
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int dpWidth = (int) (displayMetrics.widthPixels / displayMetrics.density);
+        int width = (dpWidth - 30 > 300) ? 300 : dpWidth - 30;
+        mDrawer.withDrawerWidthDp(width);
+
         mDrawer.build();
 
 
@@ -943,7 +948,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         metrica.track("ACCOUNT_QUIT");
         Account.account.twosphere_token = null;
         Account.clear();
-        if (MainActivity.instance!=null) MainActivity.instance.finish();
+        if (MainActivity.instance != null) MainActivity.instance.finish();
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
@@ -954,9 +959,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     boolean loaded = false;
 
     public void onResDownloaded() {
-        ((ImageView) findViewById(R.id.header)).setImageBitmap(Account.photo);
-        ((TextView) findViewById(R.id.headerText)).setText(Account.name);
-
+        if (((ImageView) findViewById(R.id.header)) != null) {
+            ((ImageView) findViewById(R.id.header)).setImageBitmap(Account.photo);
+            ((TextView) findViewById(R.id.headerText)).setText(Account.name);
+        }
         // Открыть фрагмент поиска по умолчанию
         fragment = new SearchFragment();
         mode = Modes.POPULAR_WEEK;
