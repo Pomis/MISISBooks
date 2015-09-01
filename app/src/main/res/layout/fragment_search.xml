@@ -58,7 +58,7 @@
                 android:layout_height="48dp"
                 android:background="@color/headerColor"
                 android:id="@+id/footerContainer"
-                android:visibility="invisible"
+                android:visibility="gone"
                 android:onClick="loadMore">
 
                 <TextView

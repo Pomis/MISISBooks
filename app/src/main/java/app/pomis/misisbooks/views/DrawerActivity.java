@@ -514,14 +514,13 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
         final int index = i;
         String descr = "";
-        descr = "Авторы: " + BackgroundLoader.loadedBooks.get(i).getAuthorsToString() +
-                "\nКатегория: " + BackgroundLoader.loadedBooks.get(i).category.categoryName +
-                "\nРазмер: " + BackgroundLoader.loadedBooks.get(i).size +
-                "\nСкачано " + BackgroundLoader.loadedBooks.get(i).countDl + " раз.";
         switch (mode) {
             case Modes.DOWNLOADS:
+                descr = "Авторы: " + FileDownloader.downloadedBooks.get(i).getAuthorsToString() +
+                        "\nКатегория: " + FileDownloader.downloadedBooks.get(i).category.categoryName +
+                        "\nРазмер: " + FileDownloader.downloadedBooks.get(i).size;
                 new MaterialDialog.Builder(this)
-                        .title(BackgroundLoader.loadedBooks.get(i).name)
+                        .title(FileDownloader.downloadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
                         .negativeText("Удалить")
@@ -589,6 +588,10 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                 break;
             default:
+                descr = "Авторы: " + BackgroundLoader.loadedBooks.get(i).getAuthorsToString() +
+                        "\nКатегория: " + BackgroundLoader.loadedBooks.get(i).category.categoryName +
+                        "\nРазмер: " + BackgroundLoader.loadedBooks.get(i).size +
+                        "\nСкачано " + BackgroundLoader.loadedBooks.get(i).countDl + " раз.";
                 new MaterialDialog.Builder(this)
                         .title(BackgroundLoader.loadedBooks.get(i).name)
                         .content(descr)

@@ -75,7 +75,7 @@ public class SearchAndLoadHistory {
         FileDownloader.downloadedBooks.clear();
         ArrayList<String> names = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("names", ""), "‚‗‚")))));
         ArrayList<String> authors = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("authors", ""), "‚‗‚")))));
-        ArrayList<String> categories = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("categories", ""), "‚‗‚")))));
+        ArrayList<String> categories = new ArrayList<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("categories", ""), "‚‗‚"))));
         ArrayList<String> filenames = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("filenames", ""), "‚‗‚")))));
         ArrayList<String> sizes = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("sizes", ""), "‚‗‚")))));
         for (int i = 0; i < names.size(); i++) {
