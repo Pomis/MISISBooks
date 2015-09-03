@@ -29,7 +29,7 @@ public class LocationManager
      * than this value.
      */
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+            UPDATE_INTERVAL_IN_MILLISECONDS;
 
     /**
      * Provides the entry point to Google Play services.
