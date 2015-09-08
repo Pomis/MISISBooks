@@ -25,7 +25,6 @@ import app.pomis.misisbooks.views.DrawerActivity;
  * Created by romanismagilov on 10.07.15.
  */
 public class FileDownloader extends AsyncTask<Book, String, String> {
-    public static ArrayList<Book> downloadedBooks = new ArrayList<>();
 
     DownloadManager downloadManager;
     String url;
@@ -42,14 +41,14 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
         downloadingBook = book[0];
         this.url = book[0].downloadUrl;
         context = DrawerActivity.getInstance();
-        fullFilename=book[0].name;
+        fullFilename = book[0].name;
         new GetExt().execute(downloadingBook.downloadUrl);
 
 
         return null;
     }
 
-    void onHeaderParsed(){
+    void onHeaderParsed() {
         final Book downloadingBookFinal = downloadingBook;
 
         downloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
@@ -86,9 +85,10 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
             public void onReceive(Context context, Intent intent) {
                 long ref = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 //if (myDownloadReference == ref) {
-                    downloadingBookFinal.fileName = fullFilename;
-                    downloadedBooks.add(downloadingBookFinal);
-                    SearchAndLoadHistory.getInstance().saveDownloadList();
+                downloadingBookFinal.fileName = fullFilename;
+                SearchAndLoadHistory.downloadedBooks.add(downloadingBookFinal);
+                //SearchAndLoadHistory.getInstance().saveDownloadList();
+                DatabaseInstruments.singleton.insertBook(downloadingBookFinal);
                 //}
             }
         };
@@ -106,7 +106,7 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
     }
 
     public static boolean checkIfDownloaded(Book checkingBook) {
-        for (Book book : downloadedBooks)
+        for (Book book : SearchAndLoadHistory.downloadedBooks)
             if (book.id == checkingBook.id)
                 return true;
         return false;
@@ -114,10 +114,8 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
 
 
     // Получение названия файла с помощью хедеров
-    class GetExt extends AsyncTask<String, Integer, String>
-    {
-        protected String doInBackground(String... urls)
-        {
+    class GetExt extends AsyncTask<String, Integer, String> {
+        protected String doInBackground(String... urls) {
             URL url;
             String ext = null;
             try {
@@ -131,7 +129,7 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
                 e1.printStackTrace();
             } catch (IOException e) {
             }
-            fullFilename += "."+ext;
+            fullFilename += "." + ext;
             return ext;
         }
 
@@ -139,6 +137,7 @@ public class FileDownloader extends AsyncTask<Book, String, String> {
         protected void onPreExecute() {
             super.onPreExecute();
         }
+
         @Override
         protected void onPostExecute(String result) {
             onHeaderParsed();

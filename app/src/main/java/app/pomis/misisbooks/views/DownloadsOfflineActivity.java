@@ -68,7 +68,7 @@ public class DownloadsOfflineActivity extends ActionBarActivity implements Adapt
     }
 
     public void showDownloadsList() {
-        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, FileDownloader.downloadedBooks);
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, SearchAndLoadHistory.downloadedBooks);
         ListView lv = ((ListView) findViewById(R.id.search_result));
         lv.setAdapter(mContentAdapter);
         lv.setOnItemClickListener(this);
@@ -100,13 +100,13 @@ public class DownloadsOfflineActivity extends ActionBarActivity implements Adapt
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         final int index = i;
         String descr = "";
-        descr = "Авторы: " + FileDownloader.downloadedBooks.get(i).getAuthorsToString() +
-                "\nКатегория: " + FileDownloader.downloadedBooks.get(i).category.categoryName +
-                "\nРазмер: " + FileDownloader.downloadedBooks.get(i).size +
-                "\nСкачано " + FileDownloader.downloadedBooks.get(i).countDl + " раз.";
+        descr = "Авторы: " + SearchAndLoadHistory.downloadedBooks.get(i).getAuthorsToString() +
+                "\nКатегория: " + SearchAndLoadHistory.downloadedBooks.get(i).category.categoryName +
+                "\nРазмер: " + SearchAndLoadHistory.downloadedBooks.get(i).size +
+                "\nСкачано " + SearchAndLoadHistory.downloadedBooks.get(i).countDl + " раз.";
 
         new MaterialDialog.Builder(this)
-                .title(FileDownloader.downloadedBooks.get(i).name)
+                .title(SearchAndLoadHistory.downloadedBooks.get(i).name)
                 .content(descr)
                 .positiveText("Открыть")
                 .negativeColorAttr(Color.parseColor("#ffffff"))
@@ -131,7 +131,7 @@ public class DownloadsOfflineActivity extends ActionBarActivity implements Adapt
                     public void onPositive(MaterialDialog dialog) {
                         super.onPositive(dialog);
                         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                FileDownloader.downloadedBooks.get(index).fileName);
+                                SearchAndLoadHistory.downloadedBooks.get(index).fileName);
                         if (file.exists()) {
                             Intent intent = new Intent();
                             intent.setAction(Intent.ACTION_VIEW);
@@ -185,7 +185,7 @@ public class DownloadsOfflineActivity extends ActionBarActivity implements Adapt
             } else {
                 view = (ViewHolder) rowView.getTag();
             }
-            Book item = FileDownloader.downloadedBooks.get(position);
+            Book item = SearchAndLoadHistory.downloadedBooks.get(position);
             view.textView.setText(item.name);
 
             view.authorsTextView.setText(item.getAuthorsToString());

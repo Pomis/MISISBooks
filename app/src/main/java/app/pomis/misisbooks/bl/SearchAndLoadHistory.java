@@ -26,6 +26,8 @@ public class SearchAndLoadHistory {
     private SharedPreferences preferences;
     private Context context;
 
+    public static ArrayList<Book> downloadedBooks = new ArrayList<>();
+
     // Singleton для вызова из широковещательного приёмника
     static public SearchAndLoadHistory instance;
 
@@ -72,51 +74,57 @@ public class SearchAndLoadHistory {
     }
 
     public void loadDownloadList() {
-        FileDownloader.downloadedBooks.clear();
-        ArrayList<String> names = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("names", ""), "‚‗‚")))));
-        ArrayList<String> authors = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("authors", ""), "‚‗‚")))));
-        ArrayList<String> categories = new ArrayList<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("categories", ""), "‚‗‚"))));
-        ArrayList<String> filenames = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("filenames", ""), "‚‗‚")))));
-        ArrayList<String> sizes = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("sizes", ""), "‚‗‚")))));
-        for (int i = 0; i < names.size(); i++) {
-            File file=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filenames.get(i));
-
-            //dir.mkdirs();
-
-           // Uri downloadLocation=Uri.fromFile(new File(dir, filenames.get(i)));
-           // File file = new File(String.valueOf(downloadLocation));
-            if (file.exists()) {
-                Book book = new Book();
-                book.authorsString = authors.get(i);
-                book.category = new Category(categories.get(i));
-                book.fileName = filenames.get(i);
-                book.name = names.get(i);
-                book.size = sizes.get(i);
-                FileDownloader.downloadedBooks.add(book);
-            }
-        }
+        //FileDownloader.downloadedBooks.clear();
+//        ArrayList<String> names = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("names", ""), "‚‗‚")))));
+//        ArrayList<String> authors = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("authors", ""), "‚‗‚")))));
+//        ArrayList<String> categories = new ArrayList<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("categories", ""), "‚‗‚"))));
+//        ArrayList<String> filenames = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("filenames", ""), "‚‗‚")))));
+//        ArrayList<String> sizes = new ArrayList<>(new HashSet<>(new ArrayList<>(Arrays.asList(TextUtils.split(preferences.getString("sizes", ""), "‚‗‚")))));
+//        for (int i = 0; i < names.size(); i++) {
+//            File file=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filenames.get(i));
+//
+//            //dir.mkdirs();
+//
+//           // Uri downloadLocation=Uri.fromFile(new File(dir, filenames.get(i)));
+//           // File file = new File(String.valueOf(downloadLocation));
+//            if (file.exists()) {
+//                Book book = new Book();
+//                book.authorsString = authors.get(i);
+//                book.category = new Category(categories.get(i));
+//                book.fileName = filenames.get(i);
+//                book.name = names.get(i);
+//                book.size = sizes.get(i);
+//                boolean ok = true;
+//                for (Book bookie : downloadedBooks)
+//                    if (bookie.name.equals(book.name))
+//                        ok = false;
+//                if (ok) downloadedBooks.add(book);
+//            }
+//        }
+        DatabaseInstruments.singleton.loadBookList();
     }
 
-    public void saveDownloadList() {
-        ArrayList<String> names = new ArrayList<>();
-        ArrayList<String> authors = new ArrayList<>();
-        ArrayList<String> categories = new ArrayList<>();
-        ArrayList<String> filenames = new ArrayList<>();
-        ArrayList<String> sizes = new ArrayList<>();
-        for (Book book : FileDownloader.downloadedBooks) {
-            names.add(book.name);
-            authors.add(book.getAuthorsToString());
-            categories.add(book.category.categoryName);
-            filenames.add(book.fileName);
-            sizes.add(book.size);
-        }
-        preferences.edit()
-                .putString("names", TextUtils.join("‚‗‚", names))
-                .putString("authors", TextUtils.join("‚‗‚", authors))
-                .putString("categories", TextUtils.join("‚‗‚", categories))
-                .putString("filenames", TextUtils.join("‚‗‚", filenames))
-                .putString("sizes", TextUtils.join("‚‗‚", sizes))
-                .apply();
-    }
+//    public void saveDownloadList() {
+//        //loadDownloadList();
+//        ArrayList<String> names = new ArrayList<>();
+//        ArrayList<String> authors = new ArrayList<>();
+//        ArrayList<String> categories = new ArrayList<>();
+//        ArrayList<String> filenames = new ArrayList<>();
+//        ArrayList<String> sizes = new ArrayList<>();
+//        for (Book book : downloadedBooks) {
+//            names.add(book.name);
+//            authors.add(book.getAuthorsToString());
+//            categories.add(book.category.categoryName);
+//            filenames.add(book.fileName);
+//            sizes.add(book.size);
+//        }
+//        preferences.edit()
+//                .putString("names", TextUtils.join("‚‗‚", names))
+//                .putString("authors", TextUtils.join("‚‗‚", authors))
+//                .putString("categories", TextUtils.join("‚‗‚", categories))
+//                .putString("filenames", TextUtils.join("‚‗‚", filenames))
+//                .putString("sizes", TextUtils.join("‚‗‚", sizes))
+//                .apply();
+//    }
 
 }

@@ -216,7 +216,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     // Выдача результатов поиска (или загрузки)
     public void onSearchResultDownloaded(int countOfNewItems) {
         mContentAdapter = new ContentAdapter(this, R.layout.book_layout,
-                (mode == Modes.DOWNLOADS) ? FileDownloader.downloadedBooks : BackgroundLoader.loadedBooks);
+                (mode == Modes.DOWNLOADS) ? SearchAndLoadHistory.downloadedBooks : BackgroundLoader.loadedBooks);
 
         ListView lv = ((ListView) findViewById(R.id.search_result));
 //            lv.addHeaderView(view);
@@ -271,7 +271,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         metrica.track("DOWNLOADS_SHOW_LIST");
 
         SearchAndLoadHistory.getInstance().loadDownloadList();
-        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, FileDownloader.downloadedBooks);
+        mContentAdapter = new ContentAdapter(this, R.layout.book_layout, SearchAndLoadHistory.downloadedBooks);
         ListView lv = ((ListView) findViewById(R.id.search_result));
         lv.setAdapter(mContentAdapter);
         lv.setOnItemClickListener(this);
@@ -279,7 +279,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         setListViewHeightBasedOnChildren(lv);
         ((ScrollView) findViewById(R.id.scrollViewId)).smoothScrollTo(0, 0);
 
-        if (FileDownloader.downloadedBooks.size() == 0) {
+        if (SearchAndLoadHistory.downloadedBooks.size() == 0) {
             findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.materialsNone).setVisibility(View.GONE);
@@ -298,7 +298,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
     }
 
     public void deleteBook(int position) {
-        FileDownloader.downloadedBooks.remove(position);
+        SearchAndLoadHistory.downloadedBooks.remove(position);
         metrica.track("BOOK_DELETED_FROM_STORAGE");
         mContentAdapter.notifyDataSetChanged();
     }
@@ -516,11 +516,11 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
         String descr = "";
         switch (mode) {
             case Modes.DOWNLOADS:
-                descr = "Авторы: " + FileDownloader.downloadedBooks.get(i).getAuthorsToString() +
-                        "\nКатегория: " + FileDownloader.downloadedBooks.get(i).category.categoryName +
-                        "\nРазмер: " + FileDownloader.downloadedBooks.get(i).size;
+                descr = "Авторы: " + SearchAndLoadHistory.downloadedBooks.get(i).getAuthorsToString() +
+                        "\nКатегория: " + SearchAndLoadHistory.downloadedBooks.get(i).category.categoryName +
+                        "\nРазмер: " + SearchAndLoadHistory.downloadedBooks.get(i).size;
                 new MaterialDialog.Builder(this)
-                        .title(FileDownloader.downloadedBooks.get(i).name)
+                        .title(SearchAndLoadHistory.downloadedBooks.get(i).name)
                         .content(descr)
                         .positiveText("Открыть")
                         .negativeText("Удалить")
@@ -538,7 +538,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                                 super.onPositive(dialog);
                                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                        FileDownloader.downloadedBooks.get(index).fileName);
+                                        SearchAndLoadHistory.downloadedBooks.get(index).fileName);
                                 if (file.exists()) {
                                     Intent intent = new Intent();
                                     intent.setAction(Intent.ACTION_VIEW);
@@ -563,14 +563,14 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
 
                                 super.onNegative(dialog);
                                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                        FileDownloader.downloadedBooks.get(index).fileName);
+                                        SearchAndLoadHistory.downloadedBooks.get(index).fileName);
 
                                 if (file.delete() ||
-                                        MediaFileFunctions.deleteViaContentProvider(DrawerActivity.getInstance(), FileDownloader.downloadedBooks.get(index).fileName)) {
+                                        MediaFileFunctions.deleteViaContentProvider(DrawerActivity.getInstance(), SearchAndLoadHistory.downloadedBooks.get(index).fileName)) {
                                     Toast.makeText(DrawerActivity.getInstance(), "Файл удалён", Toast.LENGTH_SHORT).show();
                                     //FileDownloader.downloadedBooks.remove(index);
                                     DrawerActivity.getInstance().deleteBook(index);//refresh();
-                                    if (FileDownloader.downloadedBooks.size() == 0) {
+                                    if (SearchAndLoadHistory.downloadedBooks.size() == 0) {
                                         findViewById(R.id.materialsNone).setVisibility(View.VISIBLE);
                                     } else {
                                         findViewById(R.id.materialsNone).setVisibility(View.GONE);
@@ -696,7 +696,7 @@ public class DrawerActivity extends ActionBarActivity implements AdapterView.OnI
                 } else {
                     view = (ViewHolder) rowView.getTag();
                 }
-                Book item = FileDownloader.downloadedBooks.get(position);
+                Book item = SearchAndLoadHistory.downloadedBooks.get(position);
                 view.textView.setText(item.name);
 
                 view.authorsTextView.setText(item.getAuthorsToString());

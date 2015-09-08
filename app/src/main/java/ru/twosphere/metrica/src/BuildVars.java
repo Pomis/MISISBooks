@@ -5,5 +5,5 @@ package ru.twosphere.metrica.src;
  */
 public class BuildVars {
 
-    public static String METRICA_API_KEY = "";
+    public static String METRICA_API_KEY = "a3026ed35e422dd9e3bc54fcf78b6e6c";
 }

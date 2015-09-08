@@ -23,6 +23,7 @@ import app.pomis.misisbooks.R;
 import app.pomis.misisbooks.api.Api;
 import app.pomis.misisbooks.api.KException;
 import app.pomis.misisbooks.bl.Account;
+import app.pomis.misisbooks.bl.DatabaseInstruments;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
 import ru.twosphere.metrica.src.LocationService;
 
@@ -40,6 +41,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         instance = this;
         setContentView(R.layout.activity_main);
+        DatabaseInstruments dbi = new DatabaseInstruments(this);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             findViewById(R.id.statusBarLollipop).setVisibility(View.GONE);
         }
