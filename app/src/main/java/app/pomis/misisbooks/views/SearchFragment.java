@@ -48,7 +48,7 @@ public class SearchFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Spinner s = (Spinner) getActivity().findViewById(R.id.spinnerToolbar);
-        dataAdapter = new CategoryAdapter(getActivity(), R.layout.custom_spinner, new String[]{"", "", "", "", "", "", "", ""});
+        dataAdapter = new CategoryAdapter(getActivity(), R.layout.custom_spinner, new String[]{"", "", "", "", "", "", "", "", "", "", ""});
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(dataAdapter);
         s.setOnItemSelectedListener(
