@@ -14,7 +14,6 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.d("TwosphereMetrics", "BootBroadcastReceiver BOOT_COMPLETED");
-            context.startService(new Intent(context, LocationService.class));
         }
     }
 }

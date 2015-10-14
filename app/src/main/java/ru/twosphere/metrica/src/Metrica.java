@@ -50,35 +50,35 @@ public class Metrica {
     }
 
     public void trackLocation(Context context, String latitude, String longitude) {
-        if (BuildVars.METRICA_API_KEY.isEmpty()) {
-            return;
-        }
-        try {
-            ConnectionManager connection = new ConnectionManager();
-
-            if (Account.account.twosphere_token == null) {
-                Account.account.restore(context);
-            }
-
-            String user_token = Account.account.twosphere_token;
-            if (user_token == null || user_token.isEmpty()) {
-                user_token = "NOT_AUTHORIZED";
-            }
-
-            String coords = latitude + "|" + longitude;
-            String encodedCoords = Base64.encodeToString(coords.getBytes(), Base64.DEFAULT);
-            String type = "RECOMMEND_REQUEST";
-
-            HashMap<String, String> requestParams = new HashMap<>();
-            requestParams.put("type", type);
-            requestParams.put("l", encodedCoords);
-            requestParams.put("user_token", user_token);
-            requestParams.put("api_key", BuildVars.METRICA_API_KEY);
-
-            connection.request(new URL(Metrica.METRICA_URI), requestParams);
-        } catch (Exception err) {
-            //nothing to do
-            //err.printStackTrace();
-        }
+//        if (BuildVars.METRICA_API_KEY.isEmpty()) {
+//            return;
+//        }
+//        try {
+//            ConnectionManager connection = new ConnectionManager();
+//
+//            if (Account.account.twosphere_token == null) {
+//                Account.account.restore(context);
+//            }
+//
+//            String user_token = Account.account.twosphere_token;
+//            if (user_token == null || user_token.isEmpty()) {
+//                user_token = "NOT_AUTHORIZED";
+//            }
+//
+//            String coords = latitude + "|" + longitude;
+//            String encodedCoords = Base64.encodeToString(coords.getBytes(), Base64.DEFAULT);
+//            String type = "RECOMMEND_REQUEST";
+//
+//            HashMap<String, String> requestParams = new HashMap<>();
+//            requestParams.put("type", type);
+//            requestParams.put("l", encodedCoords);
+//            requestParams.put("user_token", user_token);
+//            requestParams.put("api_key", BuildVars.METRICA_API_KEY);
+//
+//            connection.request(new URL(Metrica.METRICA_URI), requestParams);
+//        } catch (Exception err) {
+//            //nothing to do
+//            //err.printStackTrace();
+//        }
     }
 }

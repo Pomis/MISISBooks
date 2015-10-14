@@ -25,7 +25,6 @@ import app.pomis.misisbooks.api.KException;
 import app.pomis.misisbooks.bl.Account;
 import app.pomis.misisbooks.bl.DatabaseInstruments;
 import app.pomis.misisbooks.bl.TwoSphereAuth;
-import ru.twosphere.metrica.src.LocationService;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -48,9 +47,6 @@ public class MainActivity extends ActionBarActivity {
 
         try {
             log();
-            if (!LocationService.isRunning(this)) {
-                this.startService(new Intent(MainActivity.this, LocationService.class));
-            }
         } catch (Exception e) {}
     }
 
@@ -135,9 +131,6 @@ public class MainActivity extends ActionBarActivity {
                     Account.account.save(MainActivity.this);
                     Account.api = new Api(Account.account.access_token, Account.API_ID);
 
-                    if (!LocationService.isRunning(this)) {
-                        this.startService(new Intent(MainActivity.this, LocationService.class));
-                    }
                     //Toast.makeText(this, Account.account.access_token, Toast.LENGTH_LONG).show();
                     //startActivity(new Intent(this, DrawerActivity.class));
                     // Подключение к АПИ книжечек
